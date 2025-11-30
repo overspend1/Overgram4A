@@ -15,23 +15,30 @@
 
 ## What is Overgram?
 
-**Overgram for Android** is a feature-rich, privacy-focused Telegram client with enhanced customization and modern design. It's a fully reworked version based on Telegram's official Android app with powerful additions.
+**Overgram for Android** is the most visually stunning Telegram client with the revolutionary **Liquid Glass design system**. It combines beautiful glassmorphism effects with powerful productivity features that make it stand out from every other Telegram fork.
 
-The main difference between Overgram and other forks is that Overgram **saves** your messages history in a local database, while others just **cache** them. This means you can clean your cache and still have all saved messages, edits, and deletions.
+The main difference? Overgram features **real glassmorphism** - actual blur effects on chat bubbles that look absolutely gorgeous. Plus, it **saves** your message history in a local database (not just caching), so you never lose edits or deletions.
 
-Overgram also features **full ghost mode**, allowing you to hide your online status from other users, even when sending messages.
+Think of it as Telegram meets modern iOS design language, but better. 🎨✨
 
-*And, well, it's not an Iranian Telegram fork with floating TV or something.* 😄
+*And no, it's not an Iranian fork with floating TV or cryptocurrency features.* 😄
 
 ## ✨ Features
 
-### 🔒 Privacy & Ghost Mode
-- ✅ **Full Ghost Mode** (flexible) - Hide online status, read receipts, typing indicators
-- ✅ **Don't Send Online Packets** - Stay invisible while using the app
-- ✅ **Don't Send Read Receipts** - Read messages without marking as read
-- ✅ **Don't Send Typing** - Type without showing typing indicator
-- ✅ **Screenshots in Secret Chats** - No restrictions on screenshots
+### 🎨 Liquid Glass Design (FLAGSHIP)
+- ✅ **Real Glassmorphism** - True blur effects on chat bubbles
+- ✅ **6 Stunning Presets** - Subtle, Standard, Heavy, Frosted, Crystal, Midnight
+- ✅ **GPU-Accelerated** - Smooth 60 FPS rendering
+- ✅ **Material You Integration** - Dynamic colors on Android 12+
+- ✅ **Fully Customizable** - Adjust blur, opacity, saturation, brightness, tint
+- ✅ **Battery Optimized** - Smart adaptive quality during animations
+
+### 🔒 Privacy & Security
+- ✅ **Local Encryption** - Extra security layer for message database
+- ✅ **Biometric Lock** - Fingerprint/Face unlock
+- ✅ **Screenshots in Secret Chats** - No restrictions
 - ✅ **No Emulator Detection** - Works on all devices
+- ✅ **Secure Folder Access** - Protect sensitive chats
 
 ### 📝 Message History & Anti-Recall
 - ✅ **Message History Database** (flexible) - Saves all message edits and deletions
