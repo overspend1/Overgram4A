@@ -485,7 +485,7 @@ fun testBlurPerformance() {
 For issues or questions:
 - **GitHub**: https://github.com/overspend1/Overgram4A/issues
 - **Telegram**: https://t.me/overgramchat
-- **Channel**: https://t.me/overgramreleases
+- **Channel**: https://t.me/overgramupdates
 
 ---
 

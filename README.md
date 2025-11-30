@@ -7,7 +7,7 @@
 **Developed by [@overspend1](https://github.com/overspend1)**
 
 [![Download](https://img.shields.io/github/v/release/overspend1/Overgram4A?label=Download&logo=github)](https://github.com/overspend1/Overgram4A/releases)
-[![Telegram](https://img.shields.io/badge/Telegram-@overgramreleases-blue?logo=telegram)](https://t.me/overgramreleases)
+[![Telegram](https://img.shields.io/badge/Telegram-@overgramupdates-blue?logo=telegram)](https://t.me/overgramupdates)
 [![License](https://img.shields.io/github/license/overspend1/Overgram4A)](LICENSE)
 [![Developer](https://img.shields.io/badge/Developer-@overspend1-blue?logo=github)](https://github.com/overspend1)
 
@@ -77,11 +77,11 @@ Overgram also features **full ghost mode**, allowing you to hide your online sta
 ## 📱 Installation
 
 ### Download APK
-Follow our **[Telegram channel](https://t.me/overgramreleases)** and join our [chat](https://t.me/overgramchat)!
+Follow our **[Telegram channel](https://t.me/overgramupdates)** and join our [chat](https://t.me/overgramchat)!
 
 Get the latest APK from:
 - [GitHub Releases](https://github.com/overspend1/Overgram4A/releases)
-- [Telegram Channel](https://t.me/overgramreleases)
+- [Telegram Channel](https://t.me/overgramupdates)
 
 ### From Source
 ```bash
@@ -206,7 +206,7 @@ Special thanks to:
 ## 🔗 Links
 
 - 🌐 Website: [overgram.one](https://overgram.one)
-- 📱 Telegram Channel: [@overgramreleases](https://t.me/overgramreleases)
+- 📱 Telegram Channel: [@overgramupdates](https://t.me/overgramupdates)
 - 💬 Chat: [@overgramchat](https://t.me/overgramchat)
 - 🖥️ Desktop Version: [OvergramDesktop](https://github.com/Overgram/OvergramDesktop)
 - 📖 Docs: [docs.overgram.one](https://docs.overgram.one)

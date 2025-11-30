@@ -94,7 +94,7 @@ Create token at: https://github.com/settings/tokens
 #### Optional for Telegram Notifications:
 ```bash
 TELEGRAM_BOT_TOKEN=123456:ABC-DEF1234ghIkl-zyx57W2v1u123ew11
-TELEGRAM_CHANNEL_ID=@overgramreleases
+TELEGRAM_CHANNEL_ID=@overgramupdates
 ```
 
 Create bot with [@BotFather](https://t.me/botfather)
@@ -245,7 +245,7 @@ curl "https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/getMe"
 
 # Test sending message
 curl -X POST "https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendMessage" \
-  -d "chat_id=@overgramreleases" \
+  -d "chat_id=@overgramupdates" \
   -d "text=Test message"
 ```
 
