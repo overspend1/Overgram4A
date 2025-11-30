@@ -14,3 +14,11 @@ API_KEYS
 *.iml
 *.apk
 *.so
+
+# Signing and security
+*.keystore
+*.jks
+keystore.properties
+*.base64
+secrets.properties
+google-services.json

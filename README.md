@@ -1,55 +1,61 @@
-# AyuGram for Android
+# Overgram for Android
 
-![AyuGram Logo](.github/AyuGram.png)
+![Overgram Logo](.github/Overgram.png)
 
-## What's this fork even about?
+[![Download](https://img.shields.io/github/v/release/overspend1/Overgram4A?label=Download&logo=github)](https://github.com/overspend1/Overgram4A/releases)
+[![Telegram](https://img.shields.io/badge/Telegram-@OvergramReleases-blue?logo=telegram)](https://t.me/OvergramReleases)
+[![License](https://img.shields.io/github/license/overspend1/Overgram4A)](LICENSE)
 
-**Is it just exteraGram+Telegraher?**
+## What is Overgram?
 
-**AyuGram4A** is a fork of [exteraGram](https://github.com/exteraSquad/exteraGram) with
-some patches from [Telegraher](https://github.com/nikitasius/Telegraher).
+**Overgram for Android** is a feature-rich, privacy-focused Telegram client with enhanced customization and modern design. It's a fully reworked version based on Telegram's official Android app with powerful additions.
 
-But it's not just exteraGram with Telegraher's commits, **it's a fully reworked version**.
+The main difference between Overgram and other forks is that Overgram **saves** your messages history in a local database, while others just **cache** them. This means you can clean your cache and still have all saved messages, edits, and deletions.
 
-The main difference between AyuGram and Telegraher is that AyuGram **saves** your messages history,
-while Telegraher just **caches** them.
-It means that you can clean your cache and still have all saved messages.
+Overgram also features **full ghost mode**, allowing you to hide your online status from other users, even when sending messages.
 
-Also, AyuGram has **full ghost mode**.
-It allows you to hide your online status from other users, even if you send them
-a message.
+*And, well, it's not an Iranian Telegram fork with floating TV or something.* 😄
 
-*And, well, it's not an Iranian Telegram fork with floating TV or something.*
+## ✨ Features
 
-## Features list
+### 🔒 Privacy & Ghost Mode
+- ✅ **Full Ghost Mode** (flexible) - Hide online status, read receipts, typing indicators
+- ✅ **Don't Send Online Packets** - Stay invisible while using the app
+- ✅ **Don't Send Read Receipts** - Read messages without marking as read
+- ✅ **Don't Send Typing** - Type without showing typing indicator
+- ✅ **Screenshots in Secret Chats** - No restrictions on screenshots
+- ✅ **No Emulator Detection** - Works on all devices
 
-### Telegraher's patches:
+### 📝 Message History & Anti-Recall
+- ✅ **Message History Database** (flexible) - Saves all message edits and deletions
+- ✅ **Anti-Recall** - Keep deleted messages forever
+- ✅ **Edit History Tracking** - See all edits made to messages
+- ✅ **Save Chats** - Keep chats where you were banned/kicked
+- ✅ **Sync with OvergramSync** - Cloud sync of read states and message history
 
-- Built with official keys
-- Screenshots in secret chats
-- No emulator detection
-- No ads
+### 🎨 Appearance & Customization
+- ✅ **Liquid Glass Design** *(NEW!)* - Modern glassmorphism UI with blur effects
+- ✅ **Material You Integration** - Dynamic colors on Android 12+
+- ✅ **Custom Themes** - Advanced theming engine from exteraGram
+- ✅ **Custom Fonts** - Change app-wide font family
+- ✅ **Icon Customization** - Multiple app icon variants
+- ✅ **Customizable Marks** - Edit/deleted message indicators
 
-### Reworked Telegraher's patches:
+### 🚀 Performance & Features
+- ✅ **Local Telegram Premium** - Premium features without subscription
+- ✅ **No Ads** - Clean experience
+- ✅ **Message Filters** - Filter and hide unwanted content (ads, spam, etc.)
+- ✅ **Streamer Mode** - Hide sensitive information
+- ✅ **TTL Photos/Videos** - Expire button for self-destructing media
+- ✅ **Enhanced Media Viewer** - Better image/video viewing
 
-- Save chats where you were banned/kicked
-- Expire button for TTL photos/videos
-- ...something else probably
+### 🛠️ Technical Improvements
+- ✅ **Built with Official Keys** - Verified Telegram API
+- ✅ **Up to Stream Telegram Version** - Latest features and fixes
+- ✅ **Optimized Performance** - Faster and smoother
+- ✅ **Optional Crashlytics** - Disable crash reporting if you want
 
-### Our features:
-
-- Full ghost mode (flexible)
-- Messages history (flexible)
-- Message filters (e.g. hide ads)
-- Customizable edited/deleted marks
-- Local Telegram Premium
-- Sync read states and message history with AyuSync
-- Up to stream Telegram version (*snidely*)
-
-Note that we use **Crashlytics**.
-If you don't want to send crash reports, you can disable it in **exteraGram Preferences**.
-
-**AyuGram4A** does **NOT** include proprietary **exteraGram** features.
+**Note**: Overgram4A does **NOT** include proprietary exteraGram features.
 
 ## Preview
 
@@ -61,79 +67,142 @@ If you don't want to send crash reports, you can disable it in **exteraGram Pref
 
 <img src='.github/demos/demo5.png' width='210'> <img src='.github/demos/demo6.png' width='210'>
 
-## Downloads?
+## 📱 Installation
 
-Follow our **[Telegram channel](https://t.me/ayugram1338)** and join our [chat](https://t.me/ayugramchat)!
+### Download APK
+Follow our **[Telegram channel](https://t.me/OvergramReleases)** and join our [chat](https://t.me/overgramchat)!
 
-Preview versions can be downloaded
-from the **[dedicated topic](https://t.me/ayugramchat/1238)**.
+Get the latest APK from:
+- [GitHub Releases](https://github.com/overspend1/Overgram4A/releases)
+- [Telegram Channel](https://t.me/OvergramReleases)
 
-## Want to throw some money?
-
-Developing AyuGram is not such a simple task.
-**We'd be grateful for any donation <3**
-
-All available methods can be found **[here](https://ayusync.cloud/ui/donate)**.
-
-## AyuSync? What is it?
-
-**AyuSync** is our synchronization service.
-You can either use official server or host your own.
-It can sync read states and message history.
-
-Server backend can be found **[here](https://github.com/AyuGram/AyuSyncBackend)**.
-
-## Want to contribute?
-
-I'd be grateful for any contribution, since I don't really like Java. :)
-
-**Work on any feature you want.**
-
-## Want to fork?
-
-Well, just fork it.
-
-**But please, don't forget to mention us in your README.**
-
-## How to build
-
-1. Clone source code using `git clone https://github.com/AyuGram/AyuGram4A.git`
-2. Open the project in Android Studio. It should be opened, **not imported**
-3. Implement the `AyuMessageUtils` & `AyuHistoryHook` classes. It's not that hard, but if you're
-   making your **very** own fork, then you should take some time to write this part of code. Or you can search for a reversed version :)
-4. Replace `google-services.json` (we don't want to see crash reports from your app...)
-5. Generate application certificate and fill API_KEYS:
-   ```
-   APP_ID = 6
-   APP_HASH = "eb06d4abfb49dc3eeb1aeb98ae0f581e"
-   MAPS_V2_API = abcdef12345678
-   
-   SIGNING_KEY_PASSWORD = password
-   SIGNING_KEY_ALIAS = alias
-   SIGNING_KEY_STORE_PASSWORD = password
-   ```
-6. You are ready to compile `AyuGram`
-
-- **AyuGram** can be built with **Android Studio** or from the command line with **Gradle**:
-
-```
+### From Source
+```bash
+git clone --recursive https://github.com/overspend1/Overgram4A.git
+cd Overgram4A
 ./gradlew assembleAfatRelease
 ```
 
-## AyuGram Localization
+APK will be in `TMessagesProj/build/outputs/apk/afat/release/`
 
-[![Crowdin](https://badges.crowdin.net/ayugram/localized.svg)](https://crowdin.com/project/ayugram)
+## 🏗️ How to Build
+
+1. Clone source code:
+   ```bash
+   git clone --recursive https://github.com/overspend1/Overgram4A.git
+   ```
+
+2. Open the project in **Android Studio**. It should be **opened**, not imported.
+
+3. Implement the `AyuMessageUtils` & `AyuHistoryHook` classes (or search for reversed version)
+
+4. Replace `google-services.json` with your own (for Firebase/Crashlytics)
+
+5. Generate application certificate and fill `API_KEYS`:
+   ```properties
+   APP_ID = 6
+   APP_HASH = "eb06d4abfb49dc3eeb1aeb98ae0f581e"
+   MAPS_V2_API = your_maps_api_key
+
+   SIGNING_KEY_PASSWORD = your_password
+   SIGNING_KEY_ALIAS = your_alias
+   SIGNING_KEY_STORE_PASSWORD = your_store_password
+   ```
+
+6. Build Overgram:
+   ```bash
+   ./gradlew assembleAfatRelease
+   ```
+
+## 🎨 Liquid Glass Feature (NEW!)
+
+Overgram for Android features a beautiful liquid glass design system with:
+- **Real-time blur effects** using RenderScript
+- **Material 3 glassmorphism** components
+- **6 preset styles**: Subtle, Standard, Heavy, Frosted, Crystal, Midnight
+- **Customizable parameters**: Blur radius, opacity, saturation, brightness
+- **GPU-accelerated** for smooth 60 FPS performance
+- **Android 12+ optimizations** using RenderEffect API
+
+See [LIQUID_GLASS_ANDROID.md](LIQUID_GLASS_ANDROID.md) for implementation details.
+
+## 💰 Donations
+
+Developing Overgram is not a simple task. **We'd be grateful for any donation ❤️**
+
+All available methods: **[overgram.one/donate](https://overgram.one/donate)**
+
+## 🔄 OvergramSync
+
+**OvergramSync** is our synchronization service for:
+- Read states across devices
+- Message history backup
+- Settings sync
+
+You can either use our official server or host your own.
+
+Server backend: **[OvergramSync Backend](https://github.com/Overgram/OvergramSyncBackend)**
+
+## 🤝 Contributing
+
+I'd be grateful for any contribution! **Work on any feature you want.**
+
+See [CONTRIBUTING.md](.github/CONTRIBUTING.md) for guidelines.
+
+Areas we need help:
+- 🌍 Translations (via Crowdin)
+- 🐛 Bug reports and testing
+- ✨ Feature development
+- 📚 Documentation
+
+## 🌍 Localization
+
+[![Crowdin](https://badges.crowdin.net/overgram/localized.svg)](https://crowdin.com/project/overgram)
 [![Crowdin](https://badges.crowdin.net/exteralocales/localized.svg)](https://crowdin.com/project/exteralocales)
 
-We have our own **[Crowdin](https://crowdin.com/project/ayugram)**.
+We have our own **[Crowdin](https://crowdin.com/project/overgram)**.
 
-But since **AyuGram** is based on **exteraGram**, also join their project
-at **[Crowdin](https://crowdin.com/project/exteralocales)**!
+But since Overgram is based on exteraGram, also join their project at **[Crowdin](https://crowdin.com/project/exteralocales)**!
 
-## Credits
+## 🍴 Want to Fork?
 
-- **[exteraGram](https://github.com/exteraSquad/exteraGram)**
-- [Telegraher](https://github.com/nikitasius/Telegraher)
+Well, just fork it. **But please, don't forget to mention us in your README.**
+
+## ⚠️ Disclaimer
+
+This is an unofficial Telegram client. Use at your own risk.
+- We are not responsible for any account restrictions
+- Some features may violate Telegram ToS
+- Keep backups of important data
+
+## 📄 License
+
+GPL-3.0 - See [LICENSE](LICENSE) for details
+
+## 🙏 Credits
+
+Based on:
+- **[exteraGram](https://github.com/exteraSquad/exteraGram)** - Feature-rich Telegram fork
+- [Telegraher](https://github.com/nikitasius/Telegraher) - Privacy patches
 - [Cherrygram](https://github.com/arsLan4k1390/Cherrygram)
 - [Nagram](https://github.com/NextAlone/Nagram)
 - [Telegram FOSS](https://github.com/Telegram-FOSS-Team/Telegram-FOSS)
+- [Telegram for Android](https://github.com/DrKLO/Telegram) - Official app
+
+Special thanks to:
+- @Radolyn for original AyuGram concept
+- exteraSquad for the amazing base
+- All contributors and supporters
+
+## 🔗 Links
+
+- 🌐 Website: [overgram.one](https://overgram.one)
+- 📱 Telegram Channel: [@OvergramReleases](https://t.me/OvergramReleases)
+- 💬 Chat: [@overgramchat](https://t.me/overgramchat)
+- 🖥️ Desktop Version: [OvergramDesktop](https://github.com/Overgram/OvergramDesktop)
+- 📖 Docs: [docs.overgram.one](https://docs.overgram.one)
+- 🔄 Sync Backend: [OvergramSync](https://github.com/Overgram/OvergramSyncBackend)
+
+---
+
+**Overgram for Android** - Make Telegram Your Own 🚀✨

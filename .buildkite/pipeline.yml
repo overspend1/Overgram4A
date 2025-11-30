@@ -1,0 +1,207 @@
+env:
+  ANDROID_HOME: "/opt/android-sdk"
+  GRADLE_OPTS: "-Dorg.gradle.daemon=false -Dorg.gradle.parallel=true -Dorg.gradle.caching=true"
+
+steps:
+  - label: ":android: Build Android Debug"
+    key: "android-debug"
+    agents:
+      queue: "android"
+      os: "linux"
+    commands:
+      - echo "--- :hammer: Setting up Android SDK"
+      - |
+        # Install Android SDK if not present
+        if [ ! -d "$ANDROID_HOME" ]; then
+          mkdir -p $ANDROID_HOME
+          cd $ANDROID_HOME
+          wget https://dl.google.com/android/repository/commandlinetools-linux-9477386_latest.zip
+          unzip commandlinetools-linux-9477386_latest.zip
+          mkdir -p cmdline-tools/latest
+          mv cmdline-tools/* cmdline-tools/latest/
+          yes | cmdline-tools/latest/bin/sdkmanager --licenses
+          cmdline-tools/latest/bin/sdkmanager "platform-tools" "platforms;android-33" "build-tools;33.0.2"
+        fi
+
+      - echo "--- :git: Updating submodules"
+      - git submodule update --init --recursive
+
+      - echo "--- :gradle: Building Debug APK"
+      - chmod +x ./gradlew
+      - ./gradlew assembleAfatDebug
+
+      - echo "--- :package: Packaging artifacts"
+      - |
+        mkdir -p artifacts
+        cp TMessagesProj/build/outputs/apk/afat/debug/*.apk artifacts/
+        mv artifacts/*.apk artifacts/overgram-android-debug.apk
+
+    artifact_paths:
+      - "artifacts/overgram-android-debug.apk"
+
+  - label: ":android: Build Android Release"
+    key: "android-release"
+    agents:
+      queue: "android"
+      os: "linux"
+    commands:
+      - echo "--- :hammer: Setting up Android SDK"
+      - |
+        if [ ! -d "$ANDROID_HOME" ]; then
+          mkdir -p $ANDROID_HOME
+          cd $ANDROID_HOME
+          wget https://dl.google.com/android/repository/commandlinetools-linux-9477386_latest.zip
+          unzip commandlinetools-linux-9477386_latest.zip
+          mkdir -p cmdline-tools/latest
+          mv cmdline-tools/* cmdline-tools/latest/
+          yes | cmdline-tools/latest/bin/sdkmanager --licenses
+          cmdline-tools/latest/bin/sdkmanager "platform-tools" "platforms;android-33" "build-tools;33.0.2"
+        fi
+
+      - echo "--- :git: Updating submodules"
+      - git submodule update --init --recursive
+
+      - echo "--- :key: Setting up signing"
+      - |
+        # Use environment variables for signing
+        # Store these in Buildkite secrets:
+        # - KEYSTORE_FILE (base64 encoded)
+        # - KEYSTORE_PASSWORD
+        # - KEY_ALIAS
+        # - KEY_PASSWORD
+        if [ -n "$KEYSTORE_FILE" ]; then
+          echo "$KEYSTORE_FILE" | base64 -d > app-release.keystore
+        fi
+
+      - echo "--- :gradle: Building Release APK"
+      - chmod +x ./gradlew
+      - ./gradlew assembleAfatRelease
+
+      - echo "--- :package: Packaging artifacts"
+      - |
+        mkdir -p artifacts
+        cp TMessagesProj/build/outputs/apk/afat/release/*.apk artifacts/
+        mv artifacts/*.apk artifacts/overgram-android-release.apk
+
+      - echo "--- :lock: Signing APK"
+      - |
+        if [ -f "artifacts/overgram-android-release.apk" ] && [ -f "app-release.keystore" ]; then
+          $ANDROID_HOME/build-tools/33.0.2/zipalign -v 4 \
+            artifacts/overgram-android-release.apk \
+            artifacts/overgram-android-release-aligned.apk
+
+          $ANDROID_HOME/build-tools/33.0.2/apksigner sign \
+            --ks app-release.keystore \
+            --ks-pass env:KEYSTORE_PASSWORD \
+            --key-pass env:KEY_PASSWORD \
+            --out artifacts/overgram-android-signed.apk \
+            artifacts/overgram-android-release-aligned.apk
+        fi
+
+    artifact_paths:
+      - "artifacts/overgram-android-release.apk"
+      - "artifacts/overgram-android-signed.apk"
+
+  # Test step
+  - wait
+
+  - label: ":test_tube: Run Tests"
+    key: "android-test"
+    depends_on: "android-debug"
+    agents:
+      queue: "android"
+      os: "linux"
+    commands:
+      - echo "--- :test_tube: Running unit tests"
+      - ./gradlew test
+
+      - echo "--- :robot: Running lint checks"
+      - ./gradlew lint
+
+  # Build Bundle (AAB) for Play Store
+  - label: ":package: Build AAB Bundle"
+    key: "android-bundle"
+    agents:
+      queue: "android"
+      os: "linux"
+    commands:
+      - echo "--- :git: Updating submodules"
+      - git submodule update --init --recursive
+
+      - echo "--- :gradle: Building Release Bundle"
+      - chmod +x ./gradlew
+      - ./gradlew bundleAfatRelease
+
+      - echo "--- :package: Packaging AAB"
+      - |
+        mkdir -p artifacts
+        cp TMessagesProj/build/outputs/bundle/afatRelease/*.aab artifacts/
+        mv artifacts/*.aab artifacts/overgram-android-release.aab
+
+    artifact_paths:
+      - "artifacts/overgram-android-release.aab"
+
+  # Create release
+  - block: ":rocket: Create Release"
+    prompt: "Create a new GitHub release with these builds?"
+    blocked_state: "running"
+
+  - label: ":github: Create GitHub Release"
+    key: "github-release"
+    agents:
+      queue: "linux"
+    commands:
+      - echo "--- :inbox_tray: Downloading artifacts"
+      - buildkite-agent artifact download "artifacts/overgram-android-debug.apk" .
+      - buildkite-agent artifact download "artifacts/overgram-android-signed.apk" . || true
+      - buildkite-agent artifact download "artifacts/overgram-android-release.aab" . || true
+
+      - echo "--- :octocat: Creating GitHub Release"
+      - |
+        # Get version from gradle.properties
+        VERSION=$(grep "VERSION_NAME" gradle.properties | cut -d'=' -f2)
+
+        # Create release
+        gh release create "v${VERSION}" \
+          --title "Overgram Android v${VERSION}" \
+          --notes "Automated release from Buildkite CI/CD" \
+          --draft \
+          artifacts/overgram-android-debug.apk \
+          artifacts/overgram-android-signed.apk \
+          artifacts/overgram-android-release.aab
+
+    plugins:
+      - seek-oss/aws-sm#v2.3.2:
+          env:
+            GITHUB_TOKEN: github-token
+
+  # Notification
+  - label: ":telegram: Notify Telegram Channel"
+    commands:
+      - |
+        VERSION=$(grep "VERSION_NAME" gradle.properties | cut -d'=' -f2)
+        MESSAGE="✅ Overgram Android v${VERSION} build completed!\n\n"
+        MESSAGE+="Build: #$BUILDKITE_BUILD_NUMBER\n"
+        MESSAGE+="Branch: $BUILDKITE_BRANCH\n"
+        MESSAGE+="Download: https://github.com/overspend1/Overgram4A/releases"
+
+        curl -X POST "https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendMessage" \
+          -d "chat_id=${TELEGRAM_CHANNEL_ID}" \
+          -d "text=${MESSAGE}" \
+          -d "parse_mode=HTML" || echo "Telegram notification skipped"
+    soft_fail: true
+
+  # Optional: Upload to Play Store
+  - label: ":play_store: Upload to Play Store (Internal)"
+    depends_on: "android-bundle"
+    commands:
+      - echo "--- :inbox_tray: Downloading AAB"
+      - buildkite-agent artifact download "artifacts/overgram-android-release.aab" .
+
+      - echo "--- :cloud: Uploading to Play Store"
+      - |
+        # Requires Google Play service account JSON
+        # pip install google-api-python-client
+        # Use androidpublisher API to upload
+        echo "Play Store upload would happen here"
+    soft_fail: true
