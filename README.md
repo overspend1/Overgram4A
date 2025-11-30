@@ -1,10 +1,17 @@
 # Overgram for Android
 
+<div align="center">
+
 ![Overgram Logo](.github/Overgram.png)
+
+**Developed by [@overspend1](https://github.com/overspend1)**
 
 [![Download](https://img.shields.io/github/v/release/overspend1/Overgram4A?label=Download&logo=github)](https://github.com/overspend1/Overgram4A/releases)
 [![Telegram](https://img.shields.io/badge/Telegram-@OvergramReleases-blue?logo=telegram)](https://t.me/OvergramReleases)
 [![License](https://img.shields.io/github/license/overspend1/Overgram4A)](LICENSE)
+[![Developer](https://img.shields.io/badge/Developer-@overspend1-blue?logo=github)](https://github.com/overspend1)
+
+</div>
 
 ## What is Overgram?
 
@@ -188,6 +195,8 @@ Based on:
 - [Nagram](https://github.com/NextAlone/Nagram)
 - [Telegram FOSS](https://github.com/Telegram-FOSS-Team/Telegram-FOSS)
 - [Telegram for Android](https://github.com/DrKLO/Telegram) - Official app
+
+**Lead Developer**: [@overspend1](https://github.com/overspend1)
 
 Special thanks to:
 - @Radolyn for original AyuGram concept
