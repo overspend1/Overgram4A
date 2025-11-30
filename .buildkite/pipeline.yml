@@ -175,20 +175,84 @@ steps:
           env:
             GITHUB_TOKEN: github-token
 
-  # Notification
-  - label: ":telegram: Notify Telegram Channel"
+  # Upload artifacts to Telegram directly
+  - label: ":telegram: Upload & Notify Telegram"
+    depends_on: "android-release"
+    commands:
+      - echo "--- :inbox_tray: Downloading signed APK"
+      - buildkite-agent artifact download "artifacts/overgram-android-signed.apk" . || true
+
+      - echo "--- :telegram: Sending to Telegram Channel"
+      - |
+        # Get version
+        VERSION=$(grep "VERSION_NAME" gradle.properties | cut -d'=' -f2 || echo "dev")
+        BUILD_DATE=$(date +"%Y-%m-%d")
+
+        # Check if we have a signed APK, otherwise use unsigned
+        if [ -f "artifacts/overgram-android-signed.apk" ]; then
+          APK_FILE="artifacts/overgram-android-signed.apk"
+          APK_TYPE="Signed"
+        else
+          buildkite-agent artifact download "artifacts/overgram-android-release.apk" . || true
+          APK_FILE="artifacts/overgram-android-release.apk"
+          APK_TYPE="Unsigned"
+        fi
+
+        if [ -f "$APK_FILE" ] && [ -n "$TELEGRAM_BOT_TOKEN" ]; then
+          # Upload APK as file directly to Telegram
+          echo "Uploading APK to Telegram..."
+
+          # Create caption with HTML formatting
+          CAPTION="🚀 <b>Overgram Android v${VERSION}</b>%0A%0A"
+          CAPTION+="Build #${BUILDKITE_BUILD_NUMBER} • ${BUILD_DATE}%0A%0A"
+          CAPTION+="<b>✨ Features:</b>%0A"
+          CAPTION+="• Liquid Glass design system%0A"
+          CAPTION+="• Full ghost mode%0A"
+          CAPTION+="• Message history database%0A"
+          CAPTION+="• Material You theming%0A%0A"
+          CAPTION+="<b>📱 Installation:</b>%0A"
+          CAPTION+="1. Download APK above%0A"
+          CAPTION+="2. Enable Unknown Sources%0A"
+          CAPTION+="3. Install and enjoy!%0A%0A"
+          CAPTION+="👨‍💻 By @overspend1 • 💬 @overgramchat"
+
+          # Upload APK file to Telegram channel
+          curl -F "chat_id=${TELEGRAM_CHANNEL_ID}" \
+               -F "document=@${APK_FILE}" \
+               -F "caption=${CAPTION}" \
+               -F "parse_mode=HTML" \
+               "https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendDocument"
+
+          echo "✅ APK uploaded to Telegram!"
+        else
+          echo "⚠️  No APK file or no Telegram token - skipping upload"
+        fi
+    soft_fail: true
+
+  # Alternative: Text notification only (if file upload fails)
+  - label: ":speech_balloon: Notify Build Status"
+    depends_on: "android-release"
     commands:
       - |
-        VERSION=$(grep "VERSION_NAME" gradle.properties | cut -d'=' -f2)
-        MESSAGE="✅ Overgram Android v${VERSION} build completed!\n\n"
-        MESSAGE+="Build: #$BUILDKITE_BUILD_NUMBER\n"
-        MESSAGE+="Branch: $BUILDKITE_BRANCH\n"
-        MESSAGE+="Download: https://github.com/overspend1/Overgram4A/releases"
+        VERSION=$(grep "VERSION_NAME" gradle.properties | cut -d'=' -f2 || echo "dev")
 
-        curl -X POST "https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendMessage" \
-          -d "chat_id=${TELEGRAM_CHANNEL_ID}" \
-          -d "text=${MESSAGE}" \
-          -d "parse_mode=HTML" || echo "Telegram notification skipped"
+        if [ -n "$TELEGRAM_BOT_TOKEN" ]; then
+          # Get Buildkite artifact URL
+          ARTIFACT_URL="https://buildkite.com/${BUILDKITE_ORGANIZATION_SLUG}/${BUILDKITE_PIPELINE_SLUG}/builds/${BUILDKITE_BUILD_NUMBER}#artifacts"
+
+          MESSAGE="✅ <b>Build Completed</b>%0A%0A"
+          MESSAGE+="Version: v${VERSION}%0A"
+          MESSAGE+="Build: #${BUILDKITE_BUILD_NUMBER}%0A"
+          MESSAGE+="Branch: ${BUILDKITE_BRANCH}%0A%0A"
+          MESSAGE+="📦 <a href=\"${ARTIFACT_URL}\">Download from Buildkite</a>%0A%0A"
+          MESSAGE+="👨‍💻 By @overspend1"
+
+          curl -X POST "https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendMessage" \
+            -d "chat_id=${TELEGRAM_CHANNEL_ID}" \
+            -d "text=${MESSAGE}" \
+            -d "parse_mode=HTML" \
+            -d "disable_web_page_preview=true" || echo "Notification skipped"
+        fi
     soft_fail: true
 
   # Optional: Upload to Play Store
