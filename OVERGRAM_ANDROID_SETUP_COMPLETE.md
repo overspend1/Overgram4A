@@ -14,7 +14,7 @@ Successfully cloned, rebranded, and enhanced **Overgram4A** (formerly AyuGram4A)
 ### 2. Complete Rebranding
 - ✅ **README.md** - Fully rebranded with new features, badges, and links
 - ✅ Updated all AyuGram references to Overgram
-- ✅ Changed URLs to overgram.one, @OvergramReleases, etc.
+- ✅ Changed URLs to overgram.one, @overgramreleases, etc.
 - ✅ Updated donation links and credits
 - ✅ Enhanced feature list with emoji and better organization
 
@@ -175,7 +175,7 @@ git submodule update --init --recursive
 - **Sync Backend**: https://github.com/Overgram/OvergramSyncBackend (to be created)
 
 ### Community
-- **Channel**: https://t.me/OvergramReleases
+- **Channel**: https://t.me/overgramreleases
 - **Chat**: https://t.me/overgramchat
 - **Website**: https://overgram.one
 - **Docs**: https://docs.overgram.one

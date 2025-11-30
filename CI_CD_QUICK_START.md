@@ -30,7 +30,7 @@ Quick reference for setting up continuous integration and deployment for Overgra
    KEY_ALIAS            = overgram
    KEY_PASSWORD         = <your key password>
    TELEGRAM_BOT_TOKEN   = <optional, for notifications>
-   TELEGRAM_CHANNEL_ID  = @OvergramReleases
+   TELEGRAM_CHANNEL_ID  = @overgramreleases
    ```
 
 3. Push code to trigger build
@@ -139,7 +139,7 @@ Copy the token (e.g., `123456:ABC-DEF1234ghIkl-zyx57W2v1u123ew11`)
 
 **GitHub Actions:**
 - Add `TELEGRAM_BOT_TOKEN` secret
-- Add `TELEGRAM_CHANNEL_ID` secret (e.g., `@OvergramReleases`)
+- Add `TELEGRAM_CHANNEL_ID` secret (e.g., `@overgramreleases`)
 
 **Buildkite:**
 - Add environment variables:
