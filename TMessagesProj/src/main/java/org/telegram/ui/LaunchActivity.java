@@ -670,7 +670,7 @@ public class LaunchActivity extends BasePermissionsActivity implements INavigati
 
                         // Make positive button red to emphasize danger
                         dialog.setOnShowListener(dialogInterface -> {
-                            Button positiveButton = dialog.getButton(AlertDialog.BUTTON_POSITIVE);
+                            android.widget.Button positiveButton = dialog.getButton(AlertDialog.BUTTON_POSITIVE);
                             if (positiveButton != null) {
                                 positiveButton.setTextColor(Theme.getColor(Theme.key_text_RedBold));
                             }
