@@ -40,7 +40,6 @@ import com.exteragram.messenger.utils.CrashlyticsUtils;
 import com.google.firebase.analytics.FirebaseAnalytics;
 import com.google.firebase.crashlytics.FirebaseCrashlytics;
 import com.overspend1.overgram.OverConfig;
-
 import com.overspend1.overgram.sync.OverSyncController;
 import org.telegram.messenger.voip.VideoCapturerDevice;
 import org.telegram.tgnet.ConnectionsManager;
@@ -49,6 +48,8 @@ import org.telegram.ui.Components.ForegroundDetector;
 import org.telegram.ui.LauncherIconController;
 
 import java.io.File;
+import java.io.FileWriter;
+import java.io.PrintWriter;
 
 public class ApplicationLoader extends Application {
     private static PendingIntent pendingIntent;
@@ -288,6 +289,29 @@ public class ApplicationLoader extends Application {
                 } catch (Exception ex) {
                     FileLog.e(ex);
                 }
+
+                // Write crash to external storage (if available) for easy sharing without adb
+                try {
+                    File out = new File(android.os.Environment.getExternalStorageDirectory(), "overgram-crash.log");
+                    try (FileWriter fw = new FileWriter(out, true); PrintWriter pw = new PrintWriter(fw)) {
+                        pw.println("==== Crash " + new java.util.Date() + " ====");
+                        e.printStackTrace(pw);
+                        pw.flush();
+                    }
+                } catch (Exception ex) {
+                    // Fallback to app files dir
+                    try {
+                        File out = new File(getFilesDirFixed(), "overgram-crash.log");
+                        try (FileWriter fw = new FileWriter(out, true); PrintWriter pw = new PrintWriter(fw)) {
+                            pw.println("==== Crash " + new java.util.Date() + " ====");
+                            e.printStackTrace(pw);
+                            pw.flush();
+                        }
+                    } catch (Exception ignore) {
+                        FileLog.e(ignore);
+                    }
+                }
+
                 FileLog.e(Log.getStackTraceString(e));
                 if (oldDefaultUncaughtExceptionHandler != null) {
                     oldDefaultUncaughtExceptionHandler.uncaughtException(t, e);
