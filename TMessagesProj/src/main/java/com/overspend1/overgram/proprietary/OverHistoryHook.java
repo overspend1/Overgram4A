@@ -305,28 +305,21 @@ public class OverHistoryHook {
 
         // Restore attributes
         if (deleted.documentAttributesSerialized != null) {
-            doc.attributes = OverMessageUtils.deserializeTL(deleted.documentAttributesSerialized);
+            doc.attributes = OverMessageUtils.deserializeDocumentAttributes(deleted.documentAttributesSerialized);
         } else {
             doc.attributes = new ArrayList<>();
         }
 
         // Restore thumbnails
         if (deleted.thumbsSerialized != null) {
-            doc.thumbs = OverMessageUtils.deserializeTL(deleted.thumbsSerialized);
+            doc.thumbs = OverMessageUtils.deserializePhotoSizes(deleted.thumbsSerialized);
         }
 
         // For stickers, restore full document
         if (deleted.documentType == OverConstants.DOCUMENT_TYPE_STICKER && deleted.documentSerialized != null) {
-            var buffer = new org.telegram.tgnet.NativeByteBuffer(deleted.documentSerialized.length);
-            buffer.writeBytes(deleted.documentSerialized);
-            buffer.position(0);
-            try {
-                var restored = TLRPC.Document.TLdeserialize(buffer, buffer.readInt32(false), false);
-                if (restored != null) {
-                    doc = (TLRPC.TL_document) restored;
-                }
-            } catch (Exception e) {
-                Log.e("Overgram", "Failed to restore sticker", e);
+            var restored = OverMessageUtils.deserializeDocument(deleted.documentSerialized);
+            if (restored != null) {
+                doc = (TLRPC.TL_document) restored;
             }
         }
 

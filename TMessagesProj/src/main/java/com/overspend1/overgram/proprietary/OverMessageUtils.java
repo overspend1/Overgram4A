@@ -21,8 +21,7 @@ import org.telegram.messenger.FileLoader;
 import org.telegram.messenger.FileLog;
 import org.telegram.messenger.MessageObject;
 import org.telegram.messenger.MessagesController;
-import org.telegram.tgnet.NativeByteBuffer;
-import org.telegram.tgnet.TLObject;
+import org.telegram.tgnet.SerializedData;
 import org.telegram.tgnet.TLRPC;
 
 import java.io.File;
@@ -86,7 +85,7 @@ public class OverMessageUtils {
         // Message text and entities
         entity.text = msg.message;
         if (msg.entities != null && !msg.entities.isEmpty()) {
-            entity.textEntities = serializeTL(msg.entities);
+            entity.textEntities = serializeTLList(msg.entities);
         }
     }
 
@@ -167,7 +166,7 @@ public class OverMessageUtils {
         // Text and entities
         msg.message = editedMessage.text != null ? editedMessage.text : "";
         if (editedMessage.textEntities != null) {
-            msg.entities = deserializeTL(editedMessage.textEntities);
+            msg.entities = deserializeEntities(editedMessage.textEntities);
         }
     }
 
@@ -232,7 +231,7 @@ public class OverMessageUtils {
             for (var attr : document.attributes) {
                 if (attr instanceof TLRPC.TL_documentAttributeSticker) {
                     entity.documentType = OverConstants.DOCUMENT_TYPE_STICKER;
-                    entity.documentSerialized = serializeTL(document);
+                    entity.documentSerialized = serializeTLObject(document);
                     return; // Stickers don't need file copy
                 } else if (attr instanceof TLRPC.TL_documentAttributeAnimated) {
                     entity.documentType = OverConstants.DOCUMENT_TYPE_GIF;
@@ -259,11 +258,11 @@ public class OverMessageUtils {
             Files.copy(path.toPath(), destPath.toPath(), StandardCopyOption.REPLACE_EXISTING);
 
             entity.mediaPath = destPath.getAbsolutePath();
-            entity.documentAttributesSerialized = serializeTL(document.attributes);
+            entity.documentAttributesSerialized = serializeTLList(document.attributes);
 
             // Save thumbnails
             if (document.thumbs != null && !document.thumbs.isEmpty()) {
-                entity.thumbsSerialized = serializeTL(document.thumbs);
+                entity.thumbsSerialized = serializeTLList(document.thumbs);
             }
         } catch (Exception e) {
             Log.e("Overgram", "Failed to save document", e);
@@ -305,19 +304,19 @@ public class OverMessageUtils {
 
         // Restore attributes
         if (editedMessage.documentAttributesSerialized != null) {
-            doc.attributes = deserializeTL(editedMessage.documentAttributesSerialized);
+            doc.attributes = deserializeDocumentAttributes(editedMessage.documentAttributesSerialized);
         } else {
             doc.attributes = new ArrayList<>();
         }
 
         // Restore thumbnails
         if (editedMessage.thumbsSerialized != null) {
-            doc.thumbs = deserializeTL(editedMessage.thumbsSerialized);
+            doc.thumbs = deserializePhotoSizes(editedMessage.thumbsSerialized);
         }
 
         // For stickers, restore full document
         if (editedMessage.documentType == OverConstants.DOCUMENT_TYPE_STICKER && editedMessage.documentSerialized != null) {
-            var restored = (TLRPC.Document) deserializeTLSingle(editedMessage.documentSerialized);
+            var restored = deserializeDocument(editedMessage.documentSerialized);
             if (restored != null) {
                 doc = (TLRPC.TL_document) restored;
             }
@@ -355,18 +354,95 @@ public class OverMessageUtils {
 
     // === Serialization helpers ===
 
-    private static byte[] serializeTL(Object obj) {
-        // Minimal placeholder serialization; return empty to avoid crashes in absent data
-        return new byte[0];
+    // === Serialization helpers ===
+
+    private static byte[] serializeTLObject(TLRPC.TLObject obj) {
+        if (obj == null) return null;
+        try (SerializedData data = new SerializedData()) {
+            obj.serializeToStream(data);
+            return data.toByteArray();
+        } catch (Exception e) {
+            Log.e("Overgram", "Failed to serialize TL object", e);
+            return null;
+        }
     }
 
-    private static <T> ArrayList<T> deserializeTL(byte[] data) {
-        // Return empty list if data present, null otherwise
+    private static <T extends TLRPC.TLObject> byte[] serializeTLList(ArrayList<T> list) {
+        if (list == null) return null;
+        try (SerializedData data = new SerializedData()) {
+            data.writeInt32(list.size());
+            for (var item : list) {
+                item.serializeToStream(data);
+            }
+            return data.toByteArray();
+        } catch (Exception e) {
+            Log.e("Overgram", "Failed to serialize TL list", e);
+            return null;
+        }
+    }
+
+    public static ArrayList<TLRPC.MessageEntity> deserializeEntities(byte[] data) {
+        ArrayList<TLRPC.MessageEntity> list = new ArrayList<>();
+        if (data == null || data.length == 0) return list;
+        try (SerializedData sd = new SerializedData(data)) {
+            int count = sd.readInt32(false);
+            for (int i = 0; i < count; i++) {
+                int constructor = sd.readInt32(false);
+                var entity = TLRPC.MessageEntity.TLdeserialize(sd, constructor, false);
+                if (entity != null) {
+                    list.add(entity);
+                }
+            }
+        } catch (Exception e) {
+            Log.e("Overgram", "Failed to deserialize entities", e);
+        }
+        return list;
+    }
+
+    public static ArrayList<TLRPC.DocumentAttribute> deserializeDocumentAttributes(byte[] data) {
+        ArrayList<TLRPC.DocumentAttribute> list = new ArrayList<>();
+        if (data == null || data.length == 0) return list;
+        try (SerializedData sd = new SerializedData(data)) {
+            int count = sd.readInt32(false);
+            for (int i = 0; i < count; i++) {
+                int constructor = sd.readInt32(false);
+                var attr = TLRPC.DocumentAttribute.TLdeserialize(sd, constructor, false);
+                if (attr != null) {
+                    list.add(attr);
+                }
+            }
+        } catch (Exception e) {
+            Log.e("Overgram", "Failed to deserialize document attributes", e);
+        }
+        return list;
+    }
+
+    public static ArrayList<TLRPC.PhotoSize> deserializePhotoSizes(byte[] data) {
+        ArrayList<TLRPC.PhotoSize> list = new ArrayList<>();
+        if (data == null || data.length == 0) return list;
+        try (SerializedData sd = new SerializedData(data)) {
+            int count = sd.readInt32(false);
+            for (int i = 0; i < count; i++) {
+                int constructor = sd.readInt32(false);
+                var size = TLRPC.PhotoSize.TLdeserialize(sd, constructor, false);
+                if (size != null) {
+                    list.add(size);
+                }
+            }
+        } catch (Exception e) {
+            Log.e("Overgram", "Failed to deserialize photo sizes", e);
+        }
+        return list;
+    }
+
+    public static TLRPC.Document deserializeDocument(byte[] data) {
         if (data == null || data.length == 0) return null;
-        return new ArrayList<>();
-    }
-
-    private static Object deserializeTLSingle(byte[] data) {
-        return null;
+        try (SerializedData sd = new SerializedData(data)) {
+            int constructor = sd.readInt32(false);
+            return TLRPC.Document.TLdeserialize(sd, constructor, false);
+        } catch (Exception e) {
+            Log.e("Overgram", "Failed to deserialize document", e);
+            return null;
+        }
     }
 }
