@@ -69,6 +69,26 @@ public class OverConfig {
     public static String geminiModel;
     public static boolean turkishSmartTranslate;
 
+    private static String key(String base, long dialogId) {
+        return base + "_" + dialogId;
+    }
+
+    public static boolean isGeminiAllowedForDialog(long dialogId) {
+        return preferences.getBoolean(key("geminiChatEnabled", dialogId), true);
+    }
+
+    public static void setGeminiAllowedForDialog(long dialogId, boolean enabled) {
+        preferences.edit().putBoolean(key("geminiChatEnabled", dialogId), enabled).apply();
+    }
+
+    public static boolean isTurkishTranslateForDialog(long dialogId) {
+        return preferences.getBoolean(key("turkishSmartTranslateChat", dialogId), turkishSmartTranslate);
+    }
+
+    public static void setTurkishTranslateForDialog(long dialogId, boolean enabled) {
+        preferences.edit().putBoolean(key("turkishSmartTranslateChat", dialogId), enabled).apply();
+    }
+
     private static boolean configLoaded;
 
     static {

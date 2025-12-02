@@ -15,6 +15,14 @@
     <string name="OvergramGeminiModelTitle">Model</string>
     <string name="OvergramGeminiMissingKey">Add your Gemini API key in AI settings first</string>
     <string name="OvergramGeminiWorking">Contacting Gemini...</string>
+    <string name="OvergramAiEnableChat">Enable AI for this chat</string>
+    <string name="OvergramAiDisableChat">Disable AI for this chat</string>
+    <string name="OvergramAiEnabledChat">AI enabled for this chat</string>
+    <string name="OvergramAiDisabledChat">AI disabled for this chat</string>
+    <string name="OvergramTurkishEnableChat">Enable Turkish translate for this chat</string>
+    <string name="OvergramTurkishDisableChat">Disable Turkish translate for this chat</string>
+    <string name="OvergramTurkishEnabledChat">Turkish translate enabled</string>
+    <string name="OvergramTurkishDisabledChat">Turkish translate disabled</string>
     <string name="LanguageName">English</string>
     <string name="English">English</string>
     <string name="LanguageNameInEnglish">English</string>

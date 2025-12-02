@@ -977,6 +977,8 @@ public class ChatActivity extends BaseFragment implements NotificationCenter.Not
     private final static int OPTION_TRANSLATE = 29;
     private final static int OPTION_ASK_GEMINI = 30;
     private final static int OPTION_TRANSLATE_TR = 33;
+    private final static int OPTION_TOGGLE_GEMINI_CHAT = 34;
+    private final static int OPTION_TOGGLE_TURKISH_CHAT = 35;
     private final static int OPTION_HIDE_SPONSORED_MESSAGE = 31;
     private final static int OPTION_VIEW_IN_TOPIC = 32;
     private final static int OPTION_SEND_NOW = 100;
@@ -23788,14 +23790,22 @@ public class ChatActivity extends BaseFragment implements NotificationCenter.Not
                                 options.add(OPTION_TRANSLATE);
                                 icons.add(R.drawable.msg_translate);
                                 if (OverConfig.geminiEnabled && !TextUtils.isEmpty(OverConfig.geminiApiKey)) {
-                                    items.add(LocaleController.getString(R.string.OvergramGeminiAsk));
-                                    options.add(OPTION_ASK_GEMINI);
-                                    icons.add(R.drawable.msg_translate);
-                                    if (OverConfig.turkishSmartTranslate) {
-                                        items.add(LocaleController.getString(R.string.OvergramTranslateTurkish));
-                                        options.add(OPTION_TRANSLATE_TR);
+                                    if (OverConfig.isGeminiAllowedForDialog(dialog_id)) {
+                                        items.add(LocaleController.getString(R.string.OvergramGeminiAsk));
+                                        options.add(OPTION_ASK_GEMINI);
                                         icons.add(R.drawable.msg_translate);
+                                        if (OverConfig.isTurkishTranslateForDialog(dialog_id)) {
+                                            items.add(LocaleController.getString(R.string.OvergramTranslateTurkish));
+                                            options.add(OPTION_TRANSLATE_TR);
+                                            icons.add(R.drawable.msg_translate);
+                                        }
                                     }
+                                    items.add(OverConfig.isGeminiAllowedForDialog(dialog_id) ? LocaleController.getString(R.string.OvergramAiDisableChat) : LocaleController.getString(R.string.OvergramAiEnableChat));
+                                    options.add(OPTION_TOGGLE_GEMINI_CHAT);
+                                    icons.add(R.drawable.msg_translate);
+                                    items.add(OverConfig.isTurkishTranslateForDialog(dialog_id) ? LocaleController.getString(R.string.OvergramTurkishDisableChat) : LocaleController.getString(R.string.OvergramTurkishEnableChat));
+                                    options.add(OPTION_TOGGLE_TURKISH_CHAT);
+                                    icons.add(R.drawable.msg_translate);
                                 }
                             }
                         }
@@ -26647,6 +26657,18 @@ public class ChatActivity extends BaseFragment implements NotificationCenter.Not
             case OPTION_TRANSLATE_TR: {
                 CharSequence text = getSelectedMessageTextForAi();
                 requestGemini(text, true);
+                break;
+            }
+            case OPTION_TOGGLE_GEMINI_CHAT: {
+                boolean enabled = !OverConfig.isGeminiAllowedForDialog(dialog_id);
+                OverConfig.setGeminiAllowedForDialog(dialog_id, enabled);
+                BulletinFactory.of(this).createSimpleBulletin(R.raw.done, enabled ? LocaleController.getString(R.string.OvergramAiEnabledChat) : LocaleController.getString(R.string.OvergramAiDisabledChat)).show();
+                break;
+            }
+            case OPTION_TOGGLE_TURKISH_CHAT: {
+                boolean enabled = !OverConfig.isTurkishTranslateForDialog(dialog_id);
+                OverConfig.setTurkishTranslateForDialog(dialog_id, enabled);
+                BulletinFactory.of(this).createSimpleBulletin(R.raw.done, enabled ? LocaleController.getString(R.string.OvergramTurkishEnabledChat) : LocaleController.getString(R.string.OvergramTurkishDisabledChat)).show();
                 break;
             }
             case OPTION_HIDE_SPONSORED_MESSAGE: {
@@ -32714,6 +32736,11 @@ public class ChatActivity extends BaseFragment implements NotificationCenter.Not
             if (!TextUtils.isEmpty(body)) {
                 AndroidUtilities.addToClipboard(body);
                 BulletinFactory.of(this).createSimpleBulletin(R.raw.copy, LocaleController.getString("TextCopied", R.string.TextCopied)).show();
+            }
+        });
+        builder.setNeutralButton(LocaleController.getString("Paste", R.string.Paste), (dialog, which) -> {
+            if (chatActivityEnterView != null && !TextUtils.isEmpty(body)) {
+                chatActivityEnterView.setFieldText(body, true);
             }
         });
         builder.setNegativeButton(LocaleController.getString("Close", R.string.Close), null);
