@@ -6027,6 +6027,35 @@
     <string name="NotificationTopicExceptionsDesctription_few" formatted="false">%s, %d exceptions</string>
     <string name="NotificationTopicExceptionsDesctription_many" formatted="false">%s, %d exceptions</string>
     <string name="NotificationTopicExceptionsDesctription_other" formatted="false">%s, %d exceptions</string>
+    <string name="ActionGroupCallEnded">Group call ended</string>
+    <string name="ActionGroupCallJustStarted">Group call started</string>
+    <string name="CancelForward">Cancel forward</string>
+    <string name="CancelForwardMessage">Cancel forward message</string>
+    <string name="ClearRecentEmoji">Clear recent emoji</string>
+    <string name="DrawerGhostModeToggle">Ghost mode</string>
+    <string name="EnableAds">Enable ads</string>
+    <string name="KeepMediaInfo">Keep media</string>
+    <string name="PermissionNoAudio">Microphone permission required</string>
+    <string name="PermissionNoAudioVideo">Mic/Camera permission required</string>
+    <string name="PermissionNoCamera">Camera permission required</string>
+    <string name="PermissionStorage">Storage permission required</string>
+    <string name="PrivacyProfilePhotoInfo2">Profile photo privacy info</string>
+    <string name="QRCodePermissionNoCamera">Camera permission required for QR</string>
+    <string name="SelectOtherChat">Select another chat</string>
+    <string name="SendOnlinePackets">Send online status</string>
+    <string name="SendReadPackets">Send read receipts</string>
+    <string name="SendUploadProgress">Send upload progress</string>
+    <string name="ShowFromChannel">Show as channel</string>
+    <string name="TerminateSessionInfo">Terminate session info</string>
+    <string name="UserRestrictionsDisabled">User restrictions disabled</string>
+    <string name="VideoPreviewDesrciption">Video preview description</string>
+    <string name="VoipGroupEndedStartNew">Start new call</string>
+    <string name="VoipGroupInvitedToVoiceChat">Invited to voice chat</string>
+    <string name="VoipGroupJoinCall">Join call</string>
+    <string name="VoipGroupMuteMemberAlertText">Mute member</string>
+    <string name="VoipGroupStartAs">Start as</string>
+    <string name="VoipNeedMicCameraPermission">Mic/Camera permission needed</string>
+    <string name="VoipNeedMicPermission">Mic permission needed</string>
     <string name="FloatingDebugEnable">Enable floating debug</string>
     <string name="FloatingDebugDisable">Disable floating debug</string>
     <string name="DebugClearLocalDatabaseSuccess">Cleared local database.</string>

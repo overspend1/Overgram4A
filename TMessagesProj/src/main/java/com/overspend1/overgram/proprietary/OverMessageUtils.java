@@ -22,6 +22,7 @@ import org.telegram.messenger.FileLog;
 import org.telegram.messenger.MessageObject;
 import org.telegram.messenger.MessagesController;
 import org.telegram.tgnet.SerializedData;
+import org.telegram.tgnet.TLObject;
 import org.telegram.tgnet.TLRPC;
 
 import java.io.File;
@@ -356,7 +357,7 @@ public class OverMessageUtils {
 
     // === Serialization helpers ===
 
-    private static byte[] serializeTLObject(TLRPC.TLObject obj) {
+    private static byte[] serializeTLObject(TLObject obj) {
         if (obj == null) return null;
         try (SerializedData data = new SerializedData()) {
             obj.serializeToStream(data);
@@ -367,7 +368,7 @@ public class OverMessageUtils {
         }
     }
 
-    private static <T extends TLRPC.TLObject> byte[] serializeTLList(ArrayList<T> list) {
+    private static <T extends TLObject> byte[] serializeTLList(ArrayList<T> list) {
         if (list == null) return null;
         try (SerializedData data = new SerializedData()) {
             data.writeInt32(list.size());
