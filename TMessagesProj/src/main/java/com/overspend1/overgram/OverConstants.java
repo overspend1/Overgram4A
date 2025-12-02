@@ -25,6 +25,12 @@ public class OverConstants {
     public static final int DOCUMENT_TYPE_PHOTO = 1;
     public static final int DOCUMENT_TYPE_STICKER = 2;
     public static final int DOCUMENT_TYPE_FILE = 3;
+    // Additional media types
+    public static final int DOCUMENT_TYPE_GIF = 4;
+    public static final int DOCUMENT_TYPE_ROUND = 5;
+    public static final int DOCUMENT_TYPE_VIDEO = 6;
+    public static final int DOCUMENT_TYPE_VOICE = 7;
+    public static final int DOCUMENT_TYPE_AUDIO = 8;
 
     public static final int OPTION_HISTORY = 1338_01;
     public static final int OPTION_TTL = 1338_02;

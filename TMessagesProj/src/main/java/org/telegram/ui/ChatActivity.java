@@ -26662,13 +26662,13 @@ public class ChatActivity extends BaseFragment implements NotificationCenter.Not
             case OPTION_TOGGLE_GEMINI_CHAT: {
                 boolean enabled = !OverConfig.isGeminiAllowedForDialog(dialog_id);
                 OverConfig.setGeminiAllowedForDialog(dialog_id, enabled);
-                BulletinFactory.of(this).createSimpleBulletin(R.raw.done, enabled ? LocaleController.getString(R.string.OvergramAiEnabledChat) : LocaleController.getString(R.string.OvergramAiDisabledChat)).show();
+                BulletinFactory.of(this).createSimpleBulletin(R.raw.info, enabled ? LocaleController.getString(R.string.OvergramAiEnabledChat) : LocaleController.getString(R.string.OvergramAiDisabledChat)).show();
                 break;
             }
             case OPTION_TOGGLE_TURKISH_CHAT: {
                 boolean enabled = !OverConfig.isTurkishTranslateForDialog(dialog_id);
                 OverConfig.setTurkishTranslateForDialog(dialog_id, enabled);
-                BulletinFactory.of(this).createSimpleBulletin(R.raw.done, enabled ? LocaleController.getString(R.string.OvergramTurkishEnabledChat) : LocaleController.getString(R.string.OvergramTurkishDisabledChat)).show();
+                BulletinFactory.of(this).createSimpleBulletin(R.raw.info, enabled ? LocaleController.getString(R.string.OvergramTurkishEnabledChat) : LocaleController.getString(R.string.OvergramTurkishDisabledChat)).show();
                 break;
             }
             case OPTION_HIDE_SPONSORED_MESSAGE: {

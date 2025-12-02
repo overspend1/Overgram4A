@@ -16,6 +16,7 @@ import com.overspend1.overgram.OverConfig;
 import com.overspend1.overgram.OverConstants;
 import com.overspend1.overgram.database.entities.DeletedMessageFull;
 import com.overspend1.overgram.messages.OverMessagesController;
+import org.telegram.messenger.UserConfig;
 import org.telegram.messenger.FileLog;
 import org.telegram.messenger.MessageObject;
 import org.telegram.messenger.MessagesController;
@@ -72,7 +73,7 @@ public class OverHistoryHook {
             long topicId,
             boolean isSecretChat
     ) {
-        if (!OverConfig.showDeletedMessages) {
+        if (!OverConfig.saveDeletedMessages) {
             return;
         }
 
@@ -100,7 +101,7 @@ public class OverHistoryHook {
             long topicId
     ) {
         var messagesController = OverMessagesController.getInstance();
-        var userId = MessagesController.getInstance(currentAccount).getCurrentUser().id;
+        var userId = UserConfig.getInstance(currentAccount).getCurrentUser().id;
 
         // Fetch deleted messages from database
         var deletedMessages = messagesController.getMessages(userId, dialogId, topicId, startId, endId, limit);
