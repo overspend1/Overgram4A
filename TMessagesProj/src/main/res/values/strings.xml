@@ -4,6 +4,17 @@
     <string name="AppNameBeta">Overgram Beta</string>
     <string name="OvergramDeveloper">\@overspend1</string>
     <string name="OvergramAbout">Overgram - A feature-rich Telegram client with liquid glass design</string>
+    <string name="OvergramAiHeader">AI &amp; Translation</string>
+    <string name="OvergramAiSettings">AI &amp; Translation</string>
+    <string name="OvergramGeminiAsk">Ask Gemini</string>
+    <string name="OvergramTranslateTurkish">Translate to Turkish</string>
+    <string name="OvergramGeminiEnable">Enable Gemini</string>
+    <string name="OvergramTurkishTranslateEnable">Turkish Smart Translate</string>
+    <string name="OvergramGeminiKeyTitle">Gemini API Key</string>
+    <string name="OvergramGeminiKeyEmpty">Not set</string>
+    <string name="OvergramGeminiModelTitle">Model</string>
+    <string name="OvergramGeminiMissingKey">Add your Gemini API key in AI settings first</string>
+    <string name="OvergramGeminiWorking">Contacting Gemini...</string>
     <string name="LanguageName">English</string>
     <string name="English">English</string>
     <string name="LanguageNameInEnglish">English</string>

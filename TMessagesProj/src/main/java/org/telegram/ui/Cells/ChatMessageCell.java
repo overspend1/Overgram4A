@@ -164,6 +164,9 @@ import org.telegram.ui.Components.URLSpanNoUnderline;
 import org.telegram.ui.Components.VectorAvatarThumbDrawable;
 import org.telegram.ui.Components.VideoForwardDrawable;
 import org.telegram.ui.Components.spoilers.SpoilerEffect;
+import com.overspend1.overgram.ui.liquidglass.GlassParameters;
+import com.overspend1.overgram.ui.liquidglass.LiquidGlassEffect;
+import com.overspend1.overgram.ui.liquidglass.LiquidGlassPreset;
 import org.telegram.ui.PhotoViewer;
 import org.telegram.ui.PinchToZoomHelper;
 import org.telegram.ui.SecretMediaViewer;
@@ -1021,6 +1024,9 @@ public class ChatMessageCell extends BaseCell implements SeekBar.SeekBarDelegate
     private int backgroundDrawableRight;
     private int backgroundDrawableTop;
     private int backgroundDrawableBottom;
+    private LiquidGlassEffect glassEffect;
+    private Bitmap glassBackgroundCache;
+    private long lastGlassCaptureTime;
     private int viaWidth;
     private int viaNameWidth;
     private TypefaceSpan viaSpan1;
@@ -3913,6 +3919,7 @@ public class ChatMessageCell extends BaseCell implements SeekBar.SeekBarDelegate
                 pollCheckBox[a].onDetachedFromWindow();
             }
         }
+        clearGlassResources();
         attachedToWindow = false;
         avatarImage.onDetachedFromWindow();
         checkImageReceiversAttachState();
@@ -13123,6 +13130,91 @@ public class ChatMessageCell extends BaseCell implements SeekBar.SeekBarDelegate
         }
     }
 
+    private boolean shouldUseLiquidGlass() {
+        return OverConfig.liquidGlassEnabled && OverConfig.liquidGlassApplyToChatBubbles;
+    }
+
+    private GlassParameters buildGlassParameters() {
+        LiquidGlassPreset preset = LiquidGlassPreset.fromId(OverConfig.liquidGlassPreset);
+        GlassParameters params = preset.toParameters();
+        params.blurRadius = OverConfig.liquidGlassBlurRadius;
+        params.opacity = OverConfig.liquidGlassOpacity;
+        params.clamp();
+        return params;
+    }
+
+    private void ensureGlassEffect() {
+        if (glassEffect == null) {
+            glassEffect = new LiquidGlassEffect(buildGlassParameters());
+        } else {
+            glassEffect.setParameters(buildGlassParameters());
+        }
+    }
+
+    private Bitmap captureGlassBackground(Rect bounds) {
+        View parent = (View) getParent();
+        if (parent == null) {
+            return null;
+        }
+        int w = bounds.width();
+        int h = bounds.height();
+        if (w <= 0 || h <= 0) {
+            return null;
+        }
+
+        long now = System.currentTimeMillis();
+        if (glassBackgroundCache != null && !glassBackgroundCache.isRecycled() && now - lastGlassCaptureTime < 100) {
+            return glassBackgroundCache;
+        }
+
+        try {
+            Bitmap bitmap = Bitmap.createBitmap(w, h, Bitmap.Config.ARGB_8888);
+            Canvas canvas = new Canvas(bitmap);
+            canvas.save();
+            canvas.translate(-bounds.left, -bounds.top);
+
+            Drawable bg = parent.getBackground();
+            if (bg != null) {
+                bg.setBounds(0, 0, parent.getWidth(), parent.getHeight());
+                bg.draw(canvas);
+            } else {
+                canvas.drawColor(Color.TRANSPARENT);
+            }
+
+            canvas.restore();
+
+            if (glassBackgroundCache != null && !glassBackgroundCache.isRecycled()) {
+                glassBackgroundCache.recycle();
+            }
+            glassBackgroundCache = bitmap;
+            lastGlassCaptureTime = now;
+            return bitmap;
+        } catch (Exception e) {
+            return null;
+        }
+    }
+
+    private void drawLiquidGlass(Canvas canvas, Rect bounds) {
+        ensureGlassEffect();
+        Bitmap background = captureGlassBackground(bounds);
+        if (glassEffect != null && background != null && !background.isRecycled()) {
+            RectF rectF = new RectF(bounds);
+            glassEffect.apply(canvas, rectF, background);
+        }
+    }
+
+    private void clearGlassResources() {
+        if (glassBackgroundCache != null && !glassBackgroundCache.isRecycled()) {
+            glassBackgroundCache.recycle();
+        }
+        glassBackgroundCache = null;
+        lastGlassCaptureTime = 0;
+        if (glassEffect != null) {
+            glassEffect.recycle();
+            glassEffect = null;
+        }
+    }
+
     private Paint selectionOverlayPaint;
 
     @SuppressLint("WrongCall")
@@ -13590,6 +13682,8 @@ public class ChatMessageCell extends BaseCell implements SeekBar.SeekBarDelegate
             return;
         }
 
+        boolean useLiquidGlass = shouldUseLiquidGlass();
+
         int restoreCount = canvas.getSaveCount();
         if (transitionYOffsetForDrawables != 0) {
             canvas.save();
@@ -13618,105 +13712,106 @@ public class ChatMessageCell extends BaseCell implements SeekBar.SeekBarDelegate
             if (fromParent) {
                 alphaInternal *= getAlpha();
             }
-            if (hasSelectionOverlay()) {
-//                if ((isPressed() && isCheckPressed || !isCheckPressed && isPressed) && !textIsSelectionMode()) {
-//                    currentSelectedBackgroundAlpha = 1f;
-//                    currentBackgroundSelectedDrawable.setAlpha((int) (255 * alphaInternal));
-//                    currentBackgroundSelectedDrawable.drawCached(canvas, backgroundCacheParams);
-//                } else {
-                currentSelectedBackgroundAlpha = 0;
-                currentBackgroundDrawable.setAlpha((int) (255 * alphaInternal));
-                currentBackgroundDrawable.drawCached(canvas, backgroundCacheParams);
-//                }
+            if (useLiquidGlass) {
+                drawLiquidGlass(canvas, currentBackgroundDrawable.getBounds());
                 if (currentBackgroundShadowDrawable != null && currentPosition == null) {
                     currentBackgroundShadowDrawable.setAlpha((int) (255 * alphaInternal));
                     currentBackgroundShadowDrawable.draw(canvas);
                 }
             } else {
-                if (isHighlightedAnimated) {
+                if (hasSelectionOverlay()) {
+                    currentSelectedBackgroundAlpha = 0;
                     currentBackgroundDrawable.setAlpha((int) (255 * alphaInternal));
                     currentBackgroundDrawable.drawCached(canvas, backgroundCacheParams);
-                    currentSelectedBackgroundAlpha = getHighlightAlpha();
-                    if (currentPosition == null) {
-                        currentBackgroundSelectedDrawable.setAlpha((int) (alphaInternal * currentSelectedBackgroundAlpha * 255));
-                        currentBackgroundSelectedDrawable.drawCached(canvas, backgroundCacheParams);
-                    }
-                } else if (selectedBackgroundProgress != 0 && !(currentMessagesGroup != null && currentMessagesGroup.isDocuments)) {
-                    currentBackgroundDrawable.setAlpha((int) (255 * alphaInternal));
-                    currentBackgroundDrawable.drawCached(canvas, backgroundCacheParams);
-                    currentSelectedBackgroundAlpha = selectedBackgroundProgress;
-                    currentBackgroundSelectedDrawable.setAlpha((int) (currentSelectedBackgroundAlpha * alphaInternal * 255));
-                    currentBackgroundSelectedDrawable.drawCached(canvas, backgroundCacheParams);
-                    if (currentBackgroundDrawable.getGradientShader() == null) {
-                        currentBackgroundShadowDrawable = null;
+                    if (currentBackgroundShadowDrawable != null && currentPosition == null) {
+                        currentBackgroundShadowDrawable.setAlpha((int) (255 * alphaInternal));
+                        currentBackgroundShadowDrawable.draw(canvas);
                     }
                 } else {
-                    if (isDrawSelectionBackground() && (currentPosition == null || currentMessageObject.isMusic() || currentMessageObject.isDocument() || getBackground() != null)) {
-                        if (currentPosition != null) {
-                            canvas.save();
-//                            canvas.clipRect(0, 0, getMeasuredWidth(), getMeasuredHeight());
-                        }
-                        currentSelectedBackgroundAlpha = 1f;
-                        currentBackgroundSelectedDrawable.setAlpha((int) (255 * alphaInternal));
-                        currentBackgroundSelectedDrawable.drawCached(canvas, backgroundCacheParams);
-                        if (currentPosition != null) {
-                            canvas.restore();
-                        }
-                    } else {
-                        currentSelectedBackgroundAlpha = 0;
+                    if (isHighlightedAnimated) {
                         currentBackgroundDrawable.setAlpha((int) (255 * alphaInternal));
                         currentBackgroundDrawable.drawCached(canvas, backgroundCacheParams);
-                    }
-                }
-                if (currentBackgroundShadowDrawable != null && currentPosition == null) {
-                    currentBackgroundShadowDrawable.setAlpha((int) (255 * alphaInternal));
-                    currentBackgroundShadowDrawable.draw(canvas);
-                }
-
-                if (transitionParams.changePinnedBottomProgress != 1f && currentPosition == null) {
-                    if (currentMessageObject.isOutOwner()) {
-                        Theme.MessageDrawable drawable = (Theme.MessageDrawable) getThemedDrawable(Theme.key_drawable_msgOut);
-
-                        Rect rect = currentBackgroundDrawable.getBounds();
-                        drawable.setBounds(rect.left, rect.top, rect.right + AndroidUtilities.dp(6), rect.bottom);
-                        canvas.save();
-                        canvas.translate(-pinnedBottomOffset, 0);
-                        canvas.clipRect(rect.right - AndroidUtilities.dp(16), rect.bottom - AndroidUtilities.dp(16), rect.right + AndroidUtilities.dp(16), rect.bottom);
-                        int w = parentWidth;
-                        int h = parentHeight;
-                        if (h == 0) {
-                            w = getParentWidth();
-                            h = AndroidUtilities.displaySize.y;
-                            if (getParent() instanceof View) {
-                                View view = (View) getParent();
-                                w = view.getMeasuredWidth();
-                                h = view.getMeasuredHeight();
-                            }
+                        currentSelectedBackgroundAlpha = getHighlightAlpha();
+                        if (currentPosition == null) {
+                            currentBackgroundSelectedDrawable.setAlpha((int) (alphaInternal * currentSelectedBackgroundAlpha * 255));
+                            currentBackgroundSelectedDrawable.drawCached(canvas, backgroundCacheParams);
                         }
-                        drawable.setTop((int) (getY() + parentViewTopOffset), w, h, (int) parentViewTopOffset, blurredViewTopOffset, blurredViewBottomOffset, pinnedTop, pinnedBottom);
-                        drawable.setBotButtonsBottom(currentMessageObject != null && currentMessageObject.hasInlineBotButtons());
-                        float alpha = !mediaBackground && !pinnedBottom ? transitionParams.changePinnedBottomProgress : (1f - transitionParams.changePinnedBottomProgress);
-                        drawable.setAlpha((int) (255 * alpha));
-                        drawable.draw(canvas);
-                        drawable.setAlpha(255);
-                        canvas.restore();
+                    } else if (selectedBackgroundProgress != 0 && !(currentMessagesGroup != null && currentMessagesGroup.isDocuments)) {
+                        currentBackgroundDrawable.setAlpha((int) (255 * alphaInternal));
+                        currentBackgroundDrawable.drawCached(canvas, backgroundCacheParams);
+                        currentSelectedBackgroundAlpha = selectedBackgroundProgress;
+                        currentBackgroundSelectedDrawable.setAlpha((int) (currentSelectedBackgroundAlpha * alphaInternal * 255));
+                        currentBackgroundSelectedDrawable.drawCached(canvas, backgroundCacheParams);
+                        if (currentBackgroundDrawable.getGradientShader() == null) {
+                            currentBackgroundShadowDrawable = null;
+                        }
                     } else {
-                        Theme.MessageDrawable drawable;
-                        if (transitionParams.drawPinnedBottomBackground) {
-                            drawable = (Theme.MessageDrawable) getThemedDrawable(Theme.key_drawable_msgIn);
+                        if (isDrawSelectionBackground() && (currentPosition == null || currentMessageObject.isMusic() || currentMessageObject.isDocument() || getBackground() != null)) {
+                            if (currentPosition != null) {
+                                canvas.save();
+                            }
+                            currentSelectedBackgroundAlpha = 1f;
+                            currentBackgroundSelectedDrawable.setAlpha((int) (255 * alphaInternal));
+                            currentBackgroundSelectedDrawable.drawCached(canvas, backgroundCacheParams);
+                            if (currentPosition != null) {
+                                canvas.restore();
+                            }
                         } else {
-                            drawable = (Theme.MessageDrawable) getThemedDrawable(Theme.key_drawable_msgInMedia);
+                            currentSelectedBackgroundAlpha = 0;
+                            currentBackgroundDrawable.setAlpha((int) (255 * alphaInternal));
+                            currentBackgroundDrawable.drawCached(canvas, backgroundCacheParams);
                         }
-                        float alpha = !mediaBackground && !pinnedBottom ? transitionParams.changePinnedBottomProgress : (1f - transitionParams.changePinnedBottomProgress);
-                        drawable.setAlpha((int) (255 * alpha));
-                        Rect rect = currentBackgroundDrawable.getBounds();
-                        drawable.setBounds(rect.left - AndroidUtilities.dp(6), rect.top, rect.right, rect.bottom);
-                        canvas.save();
-                        canvas.translate(pinnedBottomOffset, 0);
-                        canvas.clipRect(rect.left - AndroidUtilities.dp(6), rect.bottom - AndroidUtilities.dp(16), rect.left + AndroidUtilities.dp(6 + 12), rect.bottom);
-                        drawable.draw(canvas);
-                        drawable.setAlpha(255);
-                        canvas.restore();
+                    }
+                    if (currentBackgroundShadowDrawable != null && currentPosition == null) {
+                        currentBackgroundShadowDrawable.setAlpha((int) (255 * alphaInternal));
+                        currentBackgroundShadowDrawable.draw(canvas);
+                    }
+
+                    if (transitionParams.changePinnedBottomProgress != 1f && currentPosition == null) {
+                        if (currentMessageObject.isOutOwner()) {
+                            Theme.MessageDrawable drawable = (Theme.MessageDrawable) getThemedDrawable(Theme.key_drawable_msgOut);
+
+                            Rect rect = currentBackgroundDrawable.getBounds();
+                            drawable.setBounds(rect.left, rect.top, rect.right + AndroidUtilities.dp(6), rect.bottom);
+                            canvas.save();
+                            canvas.translate(-pinnedBottomOffset, 0);
+                            canvas.clipRect(rect.right - AndroidUtilities.dp(16), rect.bottom - AndroidUtilities.dp(16), rect.right + AndroidUtilities.dp(16), rect.bottom);
+                            int w = parentWidth;
+                            int h = parentHeight;
+                            if (h == 0) {
+                                w = getParentWidth();
+                                h = AndroidUtilities.displaySize.y;
+                                if (getParent() instanceof View) {
+                                    View view = (View) getParent();
+                                    w = view.getMeasuredWidth();
+                                    h = view.getMeasuredHeight();
+                                }
+                            }
+                            drawable.setTop((int) (getY() + parentViewTopOffset), w, h, (int) parentViewTopOffset, blurredViewTopOffset, blurredViewBottomOffset, pinnedTop, pinnedBottom);
+                            drawable.setBotButtonsBottom(currentMessageObject != null && currentMessageObject.hasInlineBotButtons());
+                            float alpha = !mediaBackground && !pinnedBottom ? transitionParams.changePinnedBottomProgress : (1f - transitionParams.changePinnedBottomProgress);
+                            drawable.setAlpha((int) (255 * alpha));
+                            drawable.draw(canvas);
+                            drawable.setAlpha(255);
+                            canvas.restore();
+                        } else {
+                            Theme.MessageDrawable drawable;
+                            if (transitionParams.drawPinnedBottomBackground) {
+                                drawable = (Theme.MessageDrawable) getThemedDrawable(Theme.key_drawable_msgIn);
+                            } else {
+                                drawable = (Theme.MessageDrawable) getThemedDrawable(Theme.key_drawable_msgInMedia);
+                            }
+                            float alpha = !mediaBackground && !pinnedBottom ? transitionParams.changePinnedBottomProgress : (1f - transitionParams.changePinnedBottomProgress);
+                            drawable.setAlpha((int) (255 * alpha));
+                            Rect rect = currentBackgroundDrawable.getBounds();
+                            drawable.setBounds(rect.left - AndroidUtilities.dp(6), rect.top, rect.right, rect.bottom);
+                            canvas.save();
+                            canvas.translate(pinnedBottomOffset, 0);
+                            canvas.clipRect(rect.left - AndroidUtilities.dp(6), rect.bottom - AndroidUtilities.dp(16), rect.left + AndroidUtilities.dp(6 + 12), rect.bottom);
+                            drawable.draw(canvas);
+                            drawable.setAlpha(255);
+                            canvas.restore();
+                        }
                     }
                 }
             }

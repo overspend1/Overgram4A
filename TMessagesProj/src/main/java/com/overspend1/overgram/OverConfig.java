@@ -63,6 +63,12 @@ public class OverConfig {
     public static float liquidGlassBlurRadius;
     public static float liquidGlassOpacity;
 
+    // AI / Gemini
+    public static boolean geminiEnabled;
+    public static String geminiApiKey;
+    public static String geminiModel;
+    public static boolean turkishSmartTranslate;
+
     private static boolean configLoaded;
 
     static {
@@ -134,6 +140,12 @@ public class OverConfig {
             liquidGlassPreset = preferences.getInt("liquidGlassPreset", 1); // Default: STANDARD
             liquidGlassBlurRadius = preferences.getFloat("liquidGlassBlurRadius", 15f);
             liquidGlassOpacity = preferences.getFloat("liquidGlassOpacity", 0.75f);
+
+            // AI
+            geminiEnabled = preferences.getBoolean("geminiEnabled", false);
+            geminiApiKey = preferences.getString("geminiApiKey", "");
+            geminiModel = preferences.getString("geminiModel", "gemini-2.5-flash");
+            turkishSmartTranslate = preferences.getBoolean("turkishSmartTranslate", false);
 
             configLoaded = true;
         }

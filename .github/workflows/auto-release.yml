@@ -10,6 +10,10 @@ on:
       - 'v*'
   workflow_dispatch:
 
+permissions:
+  contents: write
+  id-token: write
+
 env:
   GRADLE_OPTS: "-Dorg.gradle.daemon=false -Dorg.gradle.parallel=true -Dorg.gradle.caching=true"
 
@@ -31,6 +35,13 @@ jobs:
           java-version: '17'
           distribution: 'temurin'
           cache: gradle
+
+      - name: Set up Android SDK
+        uses: android-actions/setup-android@v3
+        with:
+          packages: |
+            platforms;android-33
+            build-tools;33.0.2
 
       - name: Grant execute permission for gradlew
         run: chmod +x gradlew
@@ -99,6 +110,8 @@ jobs:
         run: |
           echo "🔨 Building release APK..."
           ./gradlew assembleAfatRelease --no-daemon
+          echo "🔨 Building Play Store bundle..."
+          ./gradlew bundleAfatRelease --no-daemon
           echo "✅ Build complete"
 
       - name: Sign APK
@@ -169,6 +182,27 @@ jobs:
           echo "file_size=$FILE_SIZE" >> $GITHUB_OUTPUT
 
           echo "📦 APK: $APK_NAME ($FILE_SIZE)"
+
+          FILES="$APK_NAME"
+          BUNDLE_PATH=$(find TMessagesProj/build/outputs/bundle/afatRelease -name "*.aab" -type f | head -1)
+          if [ -n "$BUNDLE_PATH" ]; then
+            BUNDLE_NAME="Overgram-${{ steps.version.outputs.version }}.aab"
+            cp "$BUNDLE_PATH" "$BUNDLE_NAME"
+            echo "bundle_name=$BUNDLE_NAME" >> $GITHUB_OUTPUT
+            echo "bundle_path=$BUNDLE_NAME" >> $GITHUB_OUTPUT
+            FILES="$FILES
+$BUNDLE_NAME"
+            echo "📦 AAB: $BUNDLE_NAME"
+          else
+            echo "bundle_name=" >> $GITHUB_OUTPUT
+            echo "bundle_path=" >> $GITHUB_OUTPUT
+          fi
+
+          {
+            echo "release_files<<'EOF'"
+            echo "$FILES"
+            echo "EOF"
+          } >> $GITHUB_OUTPUT
 
       - name: Generate Release Notes
         id: release_notes
@@ -261,8 +295,7 @@ Choose the appropriate APK for your device:
           body_path: release_notes.md
           draft: false
           prerelease: ${{ steps.version.outputs.is_prerelease }}
-          files: |
-            ${{ steps.apk_info.outputs.apk_name }}
+          files: ${{ steps.apk_info.outputs.release_files }}
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
@@ -371,7 +404,17 @@ Choose the appropriate APK for your device:
         uses: actions/upload-artifact@v4
         with:
           name: overgram-${{ steps.version.outputs.version }}
-          path: ${{ steps.apk_info.outputs.apk_name }}
+          path: |
+            ${{ steps.apk_info.outputs.apk_name }}
+            ${{ steps.apk_info.outputs.bundle_name }}
+          retention-days: 30
+
+      - name: Upload AAB as artifact
+        if: steps.apk_info.outputs.bundle_name != ''
+        uses: actions/upload-artifact@v4
+        with:
+          name: overgram-aab-${{ steps.version.outputs.version }}
+          path: ${{ steps.apk_info.outputs.bundle_name }}
           retention-days: 30
 
       - name: Summary

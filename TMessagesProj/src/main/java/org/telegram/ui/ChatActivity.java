@@ -118,6 +118,7 @@ import com.overspend1.overgram.OverFilter;
 import com.overspend1.overgram.OverUtils;
 import com.overspend1.overgram.messages.OverMessagesController;
 import com.overspend1.overgram.proprietary.OverHistoryHook;
+import com.overspend1.overgram.ai.GeminiService;
 import com.overspend1.overgram.ui.DummyView;
 import com.overspend1.overgram.utils.OverState;
 import com.overspend1.overgram.utils.OverGhostUtils;
@@ -902,6 +903,7 @@ public class ChatActivity extends BaseFragment implements NotificationCenter.Not
     private float bottomPanelTranslationYReverse;
     private boolean invalidateChatListViewTopPadding;
     private long activityResumeTime;
+    private final GeminiService geminiService = new GeminiService();
 
     private int transitionAnimationIndex;
     private int transitionAnimationGlobalIndex;
@@ -973,6 +975,8 @@ public class ChatActivity extends BaseFragment implements NotificationCenter.Not
     private final static int OPTION_VIEW_REPLIES_OR_THREAD = 27;
     private final static int OPTION_STATISTICS = 28;
     private final static int OPTION_TRANSLATE = 29;
+    private final static int OPTION_ASK_GEMINI = 30;
+    private final static int OPTION_TRANSLATE_TR = 33;
     private final static int OPTION_HIDE_SPONSORED_MESSAGE = 31;
     private final static int OPTION_VIEW_IN_TOPIC = 32;
     private final static int OPTION_SEND_NOW = 100;
@@ -23783,6 +23787,16 @@ public class ChatActivity extends BaseFragment implements NotificationCenter.Not
                                 items.add(LocaleController.getString("TranslateMessage", R.string.TranslateMessage));
                                 options.add(OPTION_TRANSLATE);
                                 icons.add(R.drawable.msg_translate);
+                                if (OverConfig.geminiEnabled && !TextUtils.isEmpty(OverConfig.geminiApiKey)) {
+                                    items.add(LocaleController.getString(R.string.OvergramGeminiAsk));
+                                    options.add(OPTION_ASK_GEMINI);
+                                    icons.add(R.drawable.msg_translate);
+                                    if (OverConfig.turkishSmartTranslate) {
+                                        items.add(LocaleController.getString(R.string.OvergramTranslateTurkish));
+                                        options.add(OPTION_TRANSLATE_TR);
+                                        icons.add(R.drawable.msg_translate);
+                                    }
+                                }
                             }
                         }
                         if (message.canEditMessage(currentChat)) {
@@ -24108,6 +24122,16 @@ public class ChatActivity extends BaseFragment implements NotificationCenter.Not
                                 items.add(LocaleController.getString("TranslateMessage", R.string.TranslateMessage));
                                 options.add(OPTION_TRANSLATE);
                                 icons.add(R.drawable.msg_translate);
+                                if (OverConfig.geminiEnabled && !TextUtils.isEmpty(OverConfig.geminiApiKey)) {
+                                    items.add(LocaleController.getString(R.string.OvergramGeminiAsk));
+                                    options.add(OPTION_ASK_GEMINI);
+                                    icons.add(R.drawable.msg_translate);
+                                    if (OverConfig.turkishSmartTranslate) {
+                                        items.add(LocaleController.getString(R.string.OvergramTranslateTurkish));
+                                        options.add(OPTION_TRANSLATE_TR);
+                                        icons.add(R.drawable.msg_translate);
+                                    }
+                                }
                             }
                         }
                         if (allowEdit) {
@@ -26613,6 +26637,16 @@ public class ChatActivity extends BaseFragment implements NotificationCenter.Not
                     .setOnPreDismissListener(di -> dimBehindView(false))
                     .setDimBehind(false);
                 preserveDim = true;
+                break;
+            }
+            case OPTION_ASK_GEMINI: {
+                CharSequence text = getSelectedMessageTextForAi();
+                requestGemini(text, false);
+                break;
+            }
+            case OPTION_TRANSLATE_TR: {
+                CharSequence text = getSelectedMessageTextForAi();
+                requestGemini(text, true);
                 break;
             }
             case OPTION_HIDE_SPONSORED_MESSAGE: {
@@ -32602,5 +32636,87 @@ public class ChatActivity extends BaseFragment implements NotificationCenter.Not
             }
             updatePinnedMessageView(true);
         }
+    }
+
+    private CharSequence getSelectedMessageTextForAi() {
+        if (selectedObject == null) {
+            return null;
+        }
+        CharSequence text = getMessageCaption(selectedObject, selectedObjectGroup, new int[]{selectedObject.getId()});
+        if (text == null && selectedObject.isPoll()) {
+            try {
+                TLRPC.Poll poll = ((TLRPC.TL_messageMediaPoll) selectedObject.messageOwner.media).poll;
+                StringBuilder pollText = new StringBuilder();
+                pollText = new StringBuilder(poll.question).append("\n");
+                for (TLRPC.TL_pollAnswer answer : poll.answers)
+                    pollText.append("\n\uD83D\uDD18 ").append(answer.text);
+                text = pollText.toString();
+            } catch (Exception ignore) { }
+        }
+        if (text == null && MessageObject.isMediaEmpty(selectedObject.messageOwner)) {
+            text = getMessageContent(selectedObject, 0, false);
+        }
+        return text;
+    }
+
+    private void requestGemini(CharSequence messageText, boolean translateToTurkish) {
+        if (getParentActivity() == null || messageText == null || messageText.length() == 0) {
+            return;
+        }
+        if (TextUtils.isEmpty(OverConfig.geminiApiKey)) {
+            BulletinFactory.of(this).createSimpleBulletin(R.raw.error, LocaleController.getString(R.string.OvergramGeminiMissingKey)).show();
+            return;
+        }
+        String prompt;
+        if (translateToTurkish) {
+            prompt = "Translate the following message into Turkish. Keep the tone casual and preserve any formatting. Reply with only the translated text.\n\nMessage:\n" + messageText;
+        } else {
+            prompt = "You are assisting a messaging app user. Provide a concise helpful answer or summary for this message:\n\n" + messageText;
+        }
+        AlertDialog.Builder builder = new AlertDialog.Builder(getParentActivity(), themeDelegate);
+        builder.setTitle(LocaleController.getString(R.string.OvergramGeminiWorking));
+        builder.setMessage(LocaleController.getString(R.string.Loading));
+        builder.setCancelable(false);
+        AlertDialog progressDialog = builder.create();
+        progressDialog.show();
+
+        Utilities.globalQueue.postRunnable(() -> geminiService.ask(prompt, OverConfig.geminiApiKey, OverConfig.geminiModel, new GeminiService.Callback() {
+            @Override
+            public void onSuccess(String text) {
+                AndroidUtilities.runOnUIThread(() -> {
+                    if (progressDialog.isShowing()) {
+                        progressDialog.dismiss();
+                    }
+                    showGeminiResult(translateToTurkish ? LocaleController.getString(R.string.OvergramTranslateTurkish) : LocaleController.getString(R.string.OvergramGeminiAsk), text);
+                });
+            }
+
+            @Override
+            public void onError(String error) {
+                AndroidUtilities.runOnUIThread(() -> {
+                    if (progressDialog.isShowing()) {
+                        progressDialog.dismiss();
+                    }
+                    BulletinFactory.of(ChatActivity.this).createSimpleBulletin(R.raw.error, "Gemini: " + error).show();
+                });
+            }
+        }));
+    }
+
+    private void showGeminiResult(String title, String body) {
+        if (getParentActivity() == null) {
+            return;
+        }
+        AlertDialog.Builder builder = new AlertDialog.Builder(getParentActivity(), themeDelegate);
+        builder.setTitle(title);
+        builder.setMessage(body);
+        builder.setPositiveButton(LocaleController.getString("Copy", R.string.Copy), (dialog, which) -> {
+            if (!TextUtils.isEmpty(body)) {
+                AndroidUtilities.addToClipboard(body);
+                BulletinFactory.of(this).createSimpleBulletin(R.raw.copy, LocaleController.getString("TextCopied", R.string.TextCopied)).show();
+            }
+        });
+        builder.setNegativeButton(LocaleController.getString("Close", R.string.Close), null);
+        showDialog(builder.create());
     }
 }

@@ -20,6 +20,7 @@ import com.overspend1.overgram.OverConfig;
 import com.overspend1.overgram.OverConstants;
 import com.overspend1.overgram.messages.OverMessagesController;
 import com.overspend1.overgram.sync.OverSyncState;
+import com.overspend1.overgram.ui.preferences.ai.AiPreferencesActivity;
 import com.overspend1.overgram.ui.preferences.utils.OverUi;
 import com.overspend1.overgram.utils.OverState;
 import org.jetbrains.annotations.NotNull;
@@ -69,6 +70,10 @@ public class OvergramPreferencesActivity extends BasePreferencesActivity impleme
     private int liquidGlassHeaderRow;
     private int liquidGlassBtnRow;
     private int liquidGlassDividerRow;
+
+    private int aiHeaderRow;
+    private int aiSettingsRow;
+    private int aiDividerRow;
 
     private int ayuSyncHeaderRow;
     private int ayuSyncStatusBtnRow;
@@ -127,6 +132,10 @@ public class OvergramPreferencesActivity extends BasePreferencesActivity impleme
         liquidGlassHeaderRow = newRow();
         liquidGlassBtnRow = newRow();
         liquidGlassDividerRow = newRow();
+
+        aiHeaderRow = newRow();
+        aiSettingsRow = newRow();
+        aiDividerRow = newRow();
 
         ayuSyncHeaderRow = newRow();
         ayuSyncStatusBtnRow = newRow();
@@ -306,6 +315,8 @@ public class OvergramPreferencesActivity extends BasePreferencesActivity impleme
             );
         } else if (position == liquidGlassBtnRow) {
             presentFragment(new LiquidGlassPreferencesActivity());
+        } else if (position == aiSettingsRow) {
+            presentFragment(new AiPreferencesActivity());
         } else if (position == ayuSyncStatusBtnRow) {
             presentFragment(new OverSyncPreferencesActivity());
         } else if (position == WALModeRow) {
@@ -384,6 +395,10 @@ public class OvergramPreferencesActivity extends BasePreferencesActivity impleme
                         textCell.setTextAndValue(LocaleController.getString(R.string.LiquidGlassHeader),
                             OverConfig.liquidGlassEnabled ? LocaleController.getString("NotificationsOn", R.string.NotificationsOn) : LocaleController.getString("NotificationsOff", R.string.NotificationsOff),
                             true);
+                    } else if (position == aiSettingsRow) {
+                        textCell.setTextAndValue(LocaleController.getString(R.string.OvergramAiSettings),
+                                OverConfig.geminiEnabled ? LocaleController.getString("NotificationsOn", R.string.NotificationsOn) : LocaleController.getString("NotificationsOff", R.string.NotificationsOff),
+                                true);
                     } else if (position == ayuSyncStatusBtnRow) {
                         var status = OverSyncState.getConnectionStateString();
 
@@ -411,6 +426,8 @@ public class OvergramPreferencesActivity extends BasePreferencesActivity impleme
                         headerCell.setText(LocaleController.getString(R.string.CustomizationHeader));
                     } else if (position == liquidGlassHeaderRow) {
                         headerCell.setText(LocaleController.getString(R.string.LiquidGlassHeader));
+                    } else if (position == aiHeaderRow) {
+                        headerCell.setText(LocaleController.getString(R.string.OvergramAiHeader));
                     } else if (position == ayuSyncHeaderRow) {
                         headerCell.setText(LocaleController.getString(R.string.AyuSyncHeader));
                     } else if (position == debugHeaderRow) {
@@ -497,10 +514,11 @@ public class OvergramPreferencesActivity extends BasePreferencesActivity impleme
                             position == spyDivider1Row ||
                             position == spyDivider2Row ||
                             position == qolDividerRow ||
-                            position == customizationDividerRow ||
-                            position == liquidGlassDividerRow ||
-                            position == ayuSyncDividerRow ||
-                            position == buttonsDividerRow
+                    position == customizationDividerRow ||
+                    position == liquidGlassDividerRow ||
+                    position == aiDividerRow ||
+                    position == ayuSyncDividerRow ||
+                    position == buttonsDividerRow
             ) {
                 return 1;
             } else if (
@@ -508,6 +526,7 @@ public class OvergramPreferencesActivity extends BasePreferencesActivity impleme
                             position == deletedMarkTextRow ||
                             position == editedMarkTextRow ||
                             position == liquidGlassBtnRow ||
+                            position == aiSettingsRow ||
                             position == ayuSyncStatusBtnRow ||
                             position == clearAyuDatabaseBtnRow ||
                             position == eraseLocalDatabaseBtnRow
@@ -519,6 +538,7 @@ public class OvergramPreferencesActivity extends BasePreferencesActivity impleme
                             position == qolHeaderRow ||
                             position == customizationHeaderRow ||
                             position == liquidGlassHeaderRow ||
+                            position == aiHeaderRow ||
                             position == ayuSyncHeaderRow ||
                             position == debugHeaderRow
             ) {
