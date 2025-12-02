@@ -202,7 +202,7 @@ public class OverMessageUtils {
 
             if (path != null && path.exists()) {
                 var destPath = new File(OverMessagesController.attachmentsPath,
-                        prefs.getMessage().getId() + "_photo.jpg");
+                        prefs.getMessage().id + "_photo.jpg");
 
                 Files.copy(path.toPath(), destPath.toPath(), StandardCopyOption.REPLACE_EXISTING);
 
@@ -355,22 +355,24 @@ public class OverMessageUtils {
 
     // === Serialization helpers ===
 
-    // === Serialization helpers ===
-
     private static byte[] serializeTLObject(TLObject obj) {
         if (obj == null) return null;
-        try (SerializedData data = new SerializedData()) {
+        SerializedData data = new SerializedData();
+        try {
             obj.serializeToStream(data);
             return data.toByteArray();
         } catch (Exception e) {
             Log.e("Overgram", "Failed to serialize TL object", e);
             return null;
+        } finally {
+            data.cleanup();
         }
     }
 
     private static <T extends TLObject> byte[] serializeTLList(ArrayList<T> list) {
         if (list == null) return null;
-        try (SerializedData data = new SerializedData()) {
+        SerializedData data = new SerializedData();
+        try {
             data.writeInt32(list.size());
             for (var item : list) {
                 item.serializeToStream(data);
@@ -379,13 +381,16 @@ public class OverMessageUtils {
         } catch (Exception e) {
             Log.e("Overgram", "Failed to serialize TL list", e);
             return null;
+        } finally {
+            data.cleanup();
         }
     }
 
     public static ArrayList<TLRPC.MessageEntity> deserializeEntities(byte[] data) {
         ArrayList<TLRPC.MessageEntity> list = new ArrayList<>();
         if (data == null || data.length == 0) return list;
-        try (SerializedData sd = new SerializedData(data)) {
+        SerializedData sd = new SerializedData(data);
+        try {
             int count = sd.readInt32(false);
             for (int i = 0; i < count; i++) {
                 int constructor = sd.readInt32(false);
@@ -396,6 +401,8 @@ public class OverMessageUtils {
             }
         } catch (Exception e) {
             Log.e("Overgram", "Failed to deserialize entities", e);
+        } finally {
+            sd.cleanup();
         }
         return list;
     }
@@ -403,7 +410,8 @@ public class OverMessageUtils {
     public static ArrayList<TLRPC.DocumentAttribute> deserializeDocumentAttributes(byte[] data) {
         ArrayList<TLRPC.DocumentAttribute> list = new ArrayList<>();
         if (data == null || data.length == 0) return list;
-        try (SerializedData sd = new SerializedData(data)) {
+        SerializedData sd = new SerializedData(data);
+        try {
             int count = sd.readInt32(false);
             for (int i = 0; i < count; i++) {
                 int constructor = sd.readInt32(false);
@@ -414,6 +422,8 @@ public class OverMessageUtils {
             }
         } catch (Exception e) {
             Log.e("Overgram", "Failed to deserialize document attributes", e);
+        } finally {
+            sd.cleanup();
         }
         return list;
     }
@@ -421,29 +431,35 @@ public class OverMessageUtils {
     public static ArrayList<TLRPC.PhotoSize> deserializePhotoSizes(byte[] data) {
         ArrayList<TLRPC.PhotoSize> list = new ArrayList<>();
         if (data == null || data.length == 0) return list;
-        try (SerializedData sd = new SerializedData(data)) {
+        SerializedData sd = new SerializedData(data);
+        try {
             int count = sd.readInt32(false);
             for (int i = 0; i < count; i++) {
                 int constructor = sd.readInt32(false);
-                var size = TLRPC.PhotoSize.TLdeserialize(sd, constructor, false);
+                var size = TLRPC.PhotoSize.TLdeserialize(0, 0, 0, sd, constructor, false);
                 if (size != null) {
                     list.add(size);
                 }
             }
         } catch (Exception e) {
             Log.e("Overgram", "Failed to deserialize photo sizes", e);
+        } finally {
+            sd.cleanup();
         }
         return list;
     }
 
     public static TLRPC.Document deserializeDocument(byte[] data) {
         if (data == null || data.length == 0) return null;
-        try (SerializedData sd = new SerializedData(data)) {
+        SerializedData sd = new SerializedData(data);
+        try {
             int constructor = sd.readInt32(false);
             return TLRPC.Document.TLdeserialize(sd, constructor, false);
         } catch (Exception e) {
             Log.e("Overgram", "Failed to deserialize document", e);
             return null;
+        } finally {
+            sd.cleanup();
         }
     }
 }

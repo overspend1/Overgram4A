@@ -32698,8 +32698,8 @@ public class ChatActivity extends BaseFragment implements NotificationCenter.Not
         AlertDialog.Builder builder = new AlertDialog.Builder(getParentActivity(), themeDelegate);
         builder.setTitle(LocaleController.getString(R.string.OvergramGeminiWorking));
         builder.setMessage(LocaleController.getString(R.string.Loading));
-        builder.setCancelable(false);
         AlertDialog progressDialog = builder.create();
+        progressDialog.setCancelable(false);
         progressDialog.show();
 
         Utilities.globalQueue.postRunnable(() -> geminiService.ask(prompt, OverConfig.geminiApiKey, OverConfig.geminiModel, new GeminiService.Callback() {

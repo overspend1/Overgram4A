@@ -71,6 +71,7 @@ import android.widget.FrameLayout;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
+import android.widget.Button;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -665,7 +666,7 @@ public class LaunchActivity extends BasePermissionsActivity implements INavigati
                         builder.setNegativeButton(LocaleController.getString("GhostModeWarningCancel", R.string.GhostModeWarningCancel), null);
 
                         AlertDialog dialog = builder.create();
-                        showDialog(dialog);
+                        dialog.show();
 
                         // Make positive button red to emphasize danger
                         dialog.setOnShowListener(dialogInterface -> {

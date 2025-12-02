@@ -11,6 +11,7 @@
 package com.overspend1.overgram.proprietary;
 
 import android.util.Pair;
+import android.util.SparseArray;
 import com.google.android.exoplayer2.util.Log;
 import com.overspend1.overgram.OverConfig;
 import com.overspend1.overgram.OverConstants;
@@ -24,7 +25,6 @@ import org.telegram.tgnet.TLRPC;
 
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.HashMap;
 
 /**
  * Hook for loading and injecting deleted messages into chat history
@@ -65,7 +65,7 @@ public class OverHistoryHook {
     public static void doHook(
             int currentAccount,
             ArrayList<MessageObject> messages,
-            HashMap<Integer, MessageObject> messagesDict,
+            SparseArray<MessageObject>[] messagesDict,
             int startId,
             int endId,
             long dialogId,
@@ -93,7 +93,7 @@ public class OverHistoryHook {
     private static void doHookInner(
             int currentAccount,
             ArrayList<MessageObject> messages,
-            HashMap<Integer, MessageObject> messagesDict,
+            SparseArray<MessageObject>[] messagesDict,
             int startId,
             int endId,
             long dialogId,
@@ -119,7 +119,7 @@ public class OverHistoryHook {
             var deleted = deletedFull.message;
 
             // Skip if message already exists in the list
-            if (messagesDict.containsKey(deleted.messageId)) {
+            if (messagesDict != null && messagesDict.length > 0 && messagesDict[0].get(deleted.messageId) != null) {
                 continue;
             }
 
@@ -135,7 +135,9 @@ public class OverHistoryHook {
 
             // Add to lists
             messages.add(messageObject);
-            messagesDict.put(deleted.messageId, messageObject);
+            if (messagesDict != null && messagesDict.length > 0) {
+                messagesDict[0].put(deleted.messageId, messageObject);
+            }
 
             injectedCount++;
         }
@@ -211,7 +213,7 @@ public class OverHistoryHook {
 
             // Entities (deserialize)
             if (deleted.textEntities != null) {
-                msg.entities = OverMessageUtils.deserializeTL(deleted.textEntities);
+                msg.entities = OverMessageUtils.deserializeEntities(deleted.textEntities);
             }
 
             // Media

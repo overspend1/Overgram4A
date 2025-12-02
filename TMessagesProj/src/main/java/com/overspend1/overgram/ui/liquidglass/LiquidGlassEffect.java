@@ -169,7 +169,8 @@ public class LiquidGlassEffect {
         try {
             // Use Telegram's optimized blur implementation
             int blurRadius = (int) Math.min(25, radius);
-            return Utilities.blurBitmap(bitmap, blurRadius, 1, bitmap.getWidth(), bitmap.getHeight(), bitmap.getRowBytes());
+            Utilities.blurBitmap(bitmap, blurRadius, 1, bitmap.getWidth(), bitmap.getHeight(), bitmap.getRowBytes());
+            return bitmap;
         } catch (Exception e) {
             return bitmap;
         }
