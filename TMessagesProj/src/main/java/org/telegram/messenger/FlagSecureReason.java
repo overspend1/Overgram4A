@@ -64,7 +64,7 @@ public class FlagSecureReason {
             return;
         }
 
-        // AyuGram: removed
+        // Overgram: removed
         window.clearFlags(WindowManager.LayoutParams.FLAG_SECURE);
     }
 

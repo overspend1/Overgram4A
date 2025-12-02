@@ -39,9 +39,9 @@ import com.exteragram.messenger.camera.CameraXUtils;
 import com.exteragram.messenger.utils.CrashlyticsUtils;
 import com.google.firebase.analytics.FirebaseAnalytics;
 import com.google.firebase.crashlytics.FirebaseCrashlytics;
-import com.radolyn.ayugram.AyuConfig;
+import com.overspend1.overgram.OverConfig;
 
-import com.radolyn.ayugram.sync.AyuSyncController;
+import com.overspend1.overgram.sync.OverSyncController;
 import org.telegram.messenger.voip.VideoCapturerDevice;
 import org.telegram.tgnet.ConnectionsManager;
 import org.telegram.tgnet.TLRPC;
@@ -141,7 +141,7 @@ public class ApplicationLoader extends Application {
         } catch (Exception e) {
             FileLog.e(e);
         }
-        return new File("/data/data/com.radolyn.ayugram/files");
+        return new File("/data/data/com.radolyn.overgram/files");
     }
 
     public static void postInitApplication() {
@@ -231,8 +231,8 @@ public class ApplicationLoader extends Application {
         ChatThemeController.init();
         BillingController.getInstance().startConnection();
 
-        // AyuGram: start sync
-        AyuSyncController.create();
+        // Overgram: start sync
+        OverSyncController.create();
     }
 
     public ApplicationLoader() {
@@ -315,7 +315,7 @@ public class ApplicationLoader extends Application {
             enabled = MessagesController.getMainSettings(UserConfig.selectedAccount).getBoolean("keepAliveService", false);
         }
         if (enabled) {
-            if (AyuConfig.keepAliveService) {
+            if (OverConfig.keepAliveService) {
                 Log.d("TFOSS", "Trying to start push service every minute");
                 AlarmManager am = (AlarmManager) applicationContext.getSystemService(Context.ALARM_SERVICE);
                 Intent i = new Intent(applicationContext, NotificationsService.class);
@@ -334,7 +334,7 @@ public class ApplicationLoader extends Application {
         } else {
             applicationContext.stopService(new Intent(applicationContext, NotificationsService.class));
 
-            if (AyuConfig.keepAliveService) {
+            if (OverConfig.keepAliveService) {
                 PendingIntent pintent = PendingIntent.getService(applicationContext, 0, new Intent(applicationContext, NotificationsService.class), PendingIntent.FLAG_MUTABLE);
                 AlarmManager alarm = (AlarmManager) applicationContext.getSystemService(Context.ALARM_SERVICE);
                 alarm.cancel(pintent);

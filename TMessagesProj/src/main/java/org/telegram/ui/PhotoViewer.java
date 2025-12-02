@@ -137,7 +137,7 @@ import com.google.android.gms.vision.Frame;
 import com.google.android.gms.vision.face.Face;
 import com.google.android.gms.vision.face.FaceDetector;
 
-import com.radolyn.ayugram.AyuConfig;
+import com.overspend1.overgram.OverConfig;
 import org.telegram.messenger.AndroidUtilities;
 import org.telegram.messenger.AnimationNotificationsLocker;
 import org.telegram.messenger.ApplicationLoader;
@@ -4093,11 +4093,11 @@ public class PhotoViewer implements NotificationCenter.NotificationCenterDelegat
             if (scheduled) {
                 return;
             }
-            // --- AyuGram hook
-            if (AyuConfig.saveDeletedMessages) {
+            // --- Overgram hook
+            if (OverConfig.saveDeletedMessages) {
                 return;
             }
-            // --- AyuGram hook
+            // --- Overgram hook
             long channelId = (Long) args[1];
             ArrayList<Integer> markAsDeletedMessages = (ArrayList<Integer>) args[0];
             boolean reset = false;

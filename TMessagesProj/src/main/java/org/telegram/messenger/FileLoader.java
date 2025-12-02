@@ -11,7 +11,7 @@ package org.telegram.messenger;
 import android.text.TextUtils;
 import android.util.SparseArray;
 
-import com.radolyn.ayugram.utils.AyuFileLocation;
+import com.overspend1.overgram.utils.OverFileLocation;
 
 import org.telegram.tgnet.TLObject;
 import org.telegram.tgnet.TLRPC;
@@ -1205,22 +1205,22 @@ public class FileLoader extends BaseController {
             }
         }
 
-        // --- AyuGram hook
+        // --- Overgram hook
         if (attach instanceof TLRPC.PhotoSize) {
             var obj = (TLRPC.PhotoSize) attach;
-            if (obj.location instanceof AyuFileLocation) {
-                return new File(((AyuFileLocation) obj.location).path);
+            if (obj.location instanceof OverFileLocation) {
+                return new File(((OverFileLocation) obj.location).path);
             }
         } else if (attach instanceof TLRPC.TL_videoSize) {
             var obj = (TLRPC.TL_videoSize) attach;
-            if (obj.location instanceof AyuFileLocation) {
-                return new File(((AyuFileLocation) obj.location).path);
+            if (obj.location instanceof OverFileLocation) {
+                return new File(((OverFileLocation) obj.location).path);
             }
-        } else if (attach instanceof AyuFileLocation) {
-            var obj = (AyuFileLocation) attach;
+        } else if (attach instanceof OverFileLocation) {
+            var obj = (OverFileLocation) attach;
             return new File(obj.path);
         }
-        // --- AyuGram hook
+        // --- Overgram hook
 
         if (dir == null) {
             return new File("");

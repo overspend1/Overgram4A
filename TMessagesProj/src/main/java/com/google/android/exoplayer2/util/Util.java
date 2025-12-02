@@ -84,7 +84,7 @@ import com.google.common.util.concurrent.Futures;
 import com.google.common.util.concurrent.ListenableFuture;
 import com.google.common.util.concurrent.MoreExecutors;
 import com.google.common.util.concurrent.SettableFuture;
-import com.radolyn.ayugram.exceptions.AyuPrivacyException;
+import com.overspend1.overgram.exceptions.OverPrivacyException;
 
 import java.io.ByteArrayOutputStream;
 import java.io.Closeable;
@@ -1636,9 +1636,9 @@ public final class Util {
    * @param applicationName String that will be prefix'ed to the generated user agent.
    * @return A user agent string generated using the applicationName and the library version.
    */
-  public static String getUserAgent(Context context, String applicationName) throws AyuPrivacyException {
-    // AyuGram: it's not being called
-    throw new AyuPrivacyException();
+  public static String getUserAgent(Context context, String applicationName) throws OverPrivacyException {
+    // Overgram: it's not being called
+    throw new OverPrivacyException();
   }
 
   /** Returns the number of codec strings in {@code codecs} whose type matches {@code trackType}. */

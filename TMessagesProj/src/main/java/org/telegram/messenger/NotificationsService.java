@@ -21,7 +21,7 @@ import androidx.core.app.NotificationCompat;
 import androidx.core.app.NotificationManagerCompat;
 
 import com.google.android.exoplayer2.util.Log;
-import com.radolyn.ayugram.AyuConfig;
+import com.overspend1.overgram.OverConfig;
 import org.telegram.ui.LaunchActivity;
 
 import java.util.Random;
@@ -58,10 +58,10 @@ public class NotificationsService extends Service {
         super.onCreate();
         ApplicationLoader.postInitApplication();
 
-        if (AyuConfig.keepAliveService && Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            String CHANNEL_ID = "ayugram_push";
+        if (OverConfig.keepAliveService && Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            String CHANNEL_ID = "overgram_push";
             NotificationChannelCompat channel = new NotificationChannelCompat.Builder(CHANNEL_ID, NotificationManagerCompat.IMPORTANCE_DEFAULT)
-                    .setName("AyuGram Push Service")
+                    .setName("Overgram Push Service")
                     .setLightsEnabled(false)
                     .setVibrationEnabled(false)
                     .setSound(null, null)
@@ -88,7 +88,7 @@ public class NotificationsService extends Service {
                         .setCategory(NotificationCompat.CATEGORY_STATUS)
                         .build();
             } catch (Exception e) {
-                Log.e("AyuGram", "Xiaomi moment", e);
+                Log.e("Overgram", "Xiaomi moment", e);
 
                 notification = new NotificationCompat.Builder(this, CHANNEL_ID)
                         .setSmallIcon(R.drawable.msg_premium_badge)

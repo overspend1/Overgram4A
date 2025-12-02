@@ -17,8 +17,8 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.exteragram.messenger.ExteraConfig;
 import com.exteragram.messenger.utils.ChatUtils;
 import com.exteragram.messenger.utils.SystemUtils;
-import com.radolyn.ayugram.AyuConfig;
-import com.radolyn.ayugram.AyuConstants;
+import com.overspend1.overgram.OverConfig;
+import com.overspend1.overgram.OverConstants;
 
 import org.telegram.messenger.AndroidUtilities;
 import org.telegram.messenger.LocaleController;
@@ -310,19 +310,19 @@ public class DrawerLayoutAdapter extends RecyclerListView.SelectionAdapter {
             peopleNearbyIcon = R.drawable.msg_nearby;
         }
 
-        // --- AyuGram hook
-        if (AyuConfig.showGhostToggleInDrawer) {
-            var msg = AyuConfig.isGhostModeActive()
+        // --- Overgram hook
+        if (OverConfig.showGhostToggleInDrawer) {
+            var msg = OverConfig.isGhostModeActive()
                     ? LocaleController.getString("DisableGhostMode", R.string.DisableGhostMode)
                     : LocaleController.getString("EnableGhostMode", R.string.EnableGhostMode);
-            items.add(new Item(AyuConstants.DRAWER_TOGGLE_GHOST, msg, R.drawable.ayu_ghost));
+            items.add(new Item(OverConstants.DRAWER_TOGGLE_GHOST, msg, R.drawable.over_ghost));
             items.add(null);
         }
-        if (AyuConfig.showKillButtonInDrawer) {
-            items.add(new Item(AyuConstants.DRAWER_KILL_APP, LocaleController.getString("KillApp", R.string.KillApp), R.drawable.msg_disable));
+        if (OverConfig.showKillButtonInDrawer) {
+            items.add(new Item(OverConstants.DRAWER_KILL_APP, LocaleController.getString("KillApp", R.string.KillApp), R.drawable.msg_disable));
             items.add(null);
         }
-        // --- AyuGram hook
+        // --- Overgram hook
 
         UserConfig me = UserConfig.getInstance(UserConfig.selectedAccount);
         if (me != null && me.isPremium() && ExteraConfig.changeStatus) {

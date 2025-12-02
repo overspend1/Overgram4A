@@ -20,7 +20,7 @@ public final class EmuInputDevicesDetector {
     }
 
     public static boolean detect() {
-        // AyuGram: remove emulator detection
+        // Overgram: remove emulator detection
         return false;
     }
 

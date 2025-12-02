@@ -31,8 +31,8 @@ import android.util.Base64;
 import androidx.collection.LongSparseArray;
 
 import com.exteragram.messenger.boost.encryption.BaseEncryptor;
-import com.radolyn.ayugram.AyuConfig;
-import com.radolyn.ayugram.AyuConstants;
+import com.overspend1.overgram.OverConfig;
+import com.overspend1.overgram.OverConstants;
 
 import org.telegram.PhoneFormat.PhoneFormat;
 import org.telegram.messenger.browser.Browser;
@@ -3891,7 +3891,7 @@ public class MessageObject {
                 } else if (getMedia(messageOwner) instanceof TLRPC.TL_messageMediaInvoice) {
                     messageText = getMedia(messageOwner).description;
                 } else if (getMedia(messageOwner) instanceof TLRPC.TL_messageMediaUnsupported) {
-                    messageText = LocaleController.getString("UnsupportedMedia", R.string.UnsupportedMedia).replace("https://telegram.org/update", "https://github.com/" + AyuConstants.APP_GITHUB + "/releases/latest").replace("Telegram", AyuConstants.APP_NAME);
+                    messageText = LocaleController.getString("UnsupportedMedia", R.string.UnsupportedMedia).replace("https://telegram.org/update", "https://github.com/" + OverConstants.APP_GITHUB + "/releases/latest").replace("Telegram", OverConstants.APP_NAME);
                 } else if (getMedia(messageOwner) instanceof TLRPC.TL_messageMediaDocument) {
                     if (isSticker() || isAnimatedStickerDocument(getDocument(), true)) {
                         String sch = getStickerChar();
@@ -5939,7 +5939,7 @@ public class MessageObject {
     }
 
     public static boolean shouldEncryptPhotoOrVideo(TLRPC.Message message) {
-        // AyuGram: disable encryption
+        // Overgram: disable encryption
         if (true) {
             return false;
         }
@@ -5974,7 +5974,7 @@ public class MessageObject {
     }
 
     public boolean needDrawBluredPreview() {
-        return needDrawBluredPreview(!AyuConfig.saveDeletedMessages);
+        return needDrawBluredPreview(!OverConfig.saveDeletedMessages);
     }
 
     public boolean needDrawBluredPreview(boolean really) {

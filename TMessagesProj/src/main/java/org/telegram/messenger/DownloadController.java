@@ -20,7 +20,7 @@ import android.util.SparseArray;
 import androidx.annotation.NonNull;
 import androidx.collection.LongSparseArray;
 
-import com.radolyn.ayugram.AyuFilter;
+import com.overspend1.overgram.OverFilter;
 import org.telegram.SQLite.SQLiteCursor;
 import org.telegram.SQLite.SQLitePreparedStatement;
 import org.telegram.tgnet.NativeByteBuffer;
@@ -613,14 +613,14 @@ public class DownloadController extends BaseController implements NotificationCe
             return 0;
         }
 
-        // --- AyuGram hook
+        // --- Overgram hook
 
-        var isFiltered = AyuFilter.isFiltered(new MessageObject(currentAccount, message, false, false), null);
+        var isFiltered = OverFilter.isFiltered(new MessageObject(currentAccount, message, false, false), null);
         if (isFiltered) {
             return 0;
         }
 
-        // --- AyuGram hook
+        // --- Overgram hook
 
         int type;
         boolean isVideo;

@@ -22,10 +22,10 @@ import android.util.SparseIntArray;
 import androidx.annotation.UiThread;
 import androidx.collection.LongSparseArray;
 
-import com.radolyn.ayugram.AyuConfig;
-import com.radolyn.ayugram.messages.AyuMessagesController;
+import com.overspend1.overgram.OverConfig;
+import com.overspend1.overgram.messages.OverMessagesController;
 
-import com.radolyn.ayugram.messages.AyuSavePreferences;
+import com.overspend1.overgram.messages.OverSavePreferences;
 import org.telegram.PhoneFormat.PhoneFormat;
 import org.telegram.SQLite.SQLiteCursor;
 import org.telegram.SQLite.SQLiteDatabase;
@@ -299,7 +299,7 @@ public class MessagesStorage extends BaseController {
             database = new SQLiteDatabase(cacheFile.getPath());
             database.executeFast("PRAGMA secure_delete = ON").stepThis().dispose();
             database.executeFast("PRAGMA temp_store = MEMORY").stepThis().dispose();
-            database.executeFast("PRAGMA journal_mode = " + AyuConfig.getWALMode()).stepThis().dispose();
+            database.executeFast("PRAGMA journal_mode = " + OverConfig.getWALMode()).stepThis().dispose();
             database.executeFast("PRAGMA journal_size_limit = 10485760").stepThis().dispose();
 
             if (createTable) {
@@ -417,7 +417,7 @@ public class MessagesStorage extends BaseController {
                 database = new SQLiteDatabase(cacheFile.getPath());
                 database.executeFast("PRAGMA secure_delete = ON").stepThis().dispose();
                 database.executeFast("PRAGMA temp_store = MEMORY").stepThis().dispose();
-                database.executeFast("PRAGMA journal_mode = " + AyuConfig.getWALMode()).stepThis().dispose();
+                database.executeFast("PRAGMA journal_mode = " + OverConfig.getWALMode()).stepThis().dispose();
                 database.executeFast("PRAGMA journal_size_limit = 10485760").stepThis().dispose();
             } catch (SQLiteException e) {
                 FileLog.e(new Exception(e));
@@ -4258,13 +4258,13 @@ public class MessagesStorage extends BaseController {
                             if (!addFilesToDelete(message, filesToDelete, idsToDelete, namesToDelete, true)) {
                                 continue;
                             } else {
-                                // --- AyuGram hook
-                                if (AyuConfig.saveMessagesHistory) {
-                                    var prefs = new AyuSavePreferences(message, currentAccount);
+                                // --- Overgram hook
+                                if (OverConfig.saveMessagesHistory) {
+                                    var prefs = new OverSavePreferences(message, currentAccount);
                                     prefs.setDialogId(dialogId);
-                                    AyuMessagesController.getInstance().onMessageEditedForce(prefs);
+                                    OverMessagesController.getInstance().onMessageEditedForce(prefs);
                                 }
-                                // --- AyuGram hook
+                                // --- Overgram hook
 
                                 if (message.media.document != null) {
                                     message.media.document = new TLRPC.TL_documentEmpty();
@@ -13541,9 +13541,9 @@ public class MessagesStorage extends BaseController {
                                         sameMedia = oldMessage.media.document.id == message.media.document.id;
                                     }
                                     if (message.from_id != null && (!oldMessage.message.equals(message.message) || !sameMedia)) {
-                                        var prefs = new AyuSavePreferences(oldMessage, currentAccount);
+                                        var prefs = new OverSavePreferences(oldMessage, currentAccount);
                                         prefs.setDialogId(dialogId);
-                                        AyuMessagesController.getInstance().onMessageEdited(prefs, message);
+                                        OverMessagesController.getInstance().onMessageEdited(prefs, message);
                                     }
                                     if (!sameMedia) {
                                         addFilesToDelete(oldMessage, filesToDelete, idsToDelete, namesToDelete, false);

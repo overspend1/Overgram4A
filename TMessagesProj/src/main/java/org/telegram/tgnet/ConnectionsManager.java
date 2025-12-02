@@ -9,11 +9,11 @@ import android.os.SystemClock;
 import android.text.TextUtils;
 import android.util.Base64;
 
-import com.radolyn.ayugram.AyuConfig;
-import com.radolyn.ayugram.AyuConstants;
-import com.radolyn.ayugram.sync.AyuSyncController;
-import com.radolyn.ayugram.utils.AyuGhostUtils;
-import com.radolyn.ayugram.utils.AyuState;
+import com.overspend1.overgram.OverConfig;
+import com.overspend1.overgram.OverConstants;
+import com.overspend1.overgram.sync.OverSyncController;
+import com.overspend1.overgram.utils.OverGhostUtils;
+import com.overspend1.overgram.utils.OverState;
 
 import org.json.JSONArray;
 import org.json.JSONObject;
@@ -304,10 +304,10 @@ public class ConnectionsManager extends BaseController {
             FileLog.d("send request " + object + " with token = " + requestToken);
         }
 
-        // --- AyuGram request hook
+        // --- Overgram request hook
         {
             // don't send upload & typing status
-            if (!AyuConfig.sendUploadProgress &&
+            if (!OverConfig.sendUploadProgress &&
                     (
                             object instanceof TLRPC.TL_messages_setTyping ||
                             object instanceof TLRPC.TL_messages_setEncryptedTyping
@@ -318,14 +318,14 @@ public class ConnectionsManager extends BaseController {
             }
 
             // don't send online status
-            if (!AyuConfig.sendOnlinePackets && object instanceof TLRPC.TL_account_updateStatus) {
+            if (!OverConfig.sendOnlinePackets && object instanceof TLRPC.TL_account_updateStatus) {
                 var obj = ((TLRPC.TL_account_updateStatus) object);
                 obj.offline = true;
             }
 
             // don't send read status
             if (
-                    !AyuConfig.sendReadPackets &&
+                    !OverConfig.sendReadPackets &&
                             (
                                     object instanceof TLRPC.TL_messages_readHistory ||
                                     object instanceof TLRPC.TL_messages_readEncryptedHistory ||
@@ -335,7 +335,7 @@ public class ConnectionsManager extends BaseController {
                                     object instanceof TLRPC.TL_channels_readMessageContents
                             )
             ) {
-                if (!AyuState.getAllowReadPacket()) {
+                if (!OverState.getAllowReadPacket()) {
                     var fakeRes = new TLRPC.TL_messages_affectedMessages();
                     // IDK if this should be -1 or what, check `TL_messages_readMessageContents` usages
                     fakeRes.pts = -1;
@@ -349,9 +349,9 @@ public class ConnectionsManager extends BaseController {
                         FileLog.e(e);
                     }
 
-                    var pair = AyuGhostUtils.getDialogIdAndMessageIdFromRequest(object);
+                    var pair = OverGhostUtils.getDialogIdAndMessageIdFromRequest(object);
                     if (pair != null) {
-                        AyuSyncController.getInstance().syncRead(currentAccount, pair.first, pair.second);
+                        OverSyncController.getInstance().syncRead(currentAccount, pair.first, pair.second);
                     }
 
                     return;
@@ -359,7 +359,7 @@ public class ConnectionsManager extends BaseController {
             }
 
             // mark messages as read after sending a message
-            if (AyuConfig.markReadAfterSend && !AyuConfig.sendReadPackets) {
+            if (OverConfig.markReadAfterSend && !OverConfig.sendReadPackets) {
                 TLRPC.InputPeer peer = null;
                 if (object instanceof TLRPC.TL_messages_sendMessage) {
                     var obj = ((TLRPC.TL_messages_sendMessage) object);
@@ -373,7 +373,7 @@ public class ConnectionsManager extends BaseController {
                 }
 
                 if (peer != null) {
-                    var dialogId = AyuGhostUtils.getDialogId(peer);
+                    var dialogId = OverGhostUtils.getDialogId(peer);
 
                     var origOnComplete = onCompleteOrig;
                     TLRPC.InputPeer finalPeer = peer;
@@ -385,7 +385,7 @@ public class ConnectionsManager extends BaseController {
                             request.peer = finalPeer;
                             request.max_id = maxId;
 
-                            AyuState.setAllowReadPacket(true, 1);
+                            OverState.setAllowReadPacket(true, 1);
                             sendRequest(request, (a1, a2) -> {});
                         });
                     };
@@ -393,7 +393,7 @@ public class ConnectionsManager extends BaseController {
             }
         }
         final var onComplete = onCompleteOrig;
-        // --- AyuGram request hook
+        // --- Overgram request hook
 
         try {
             NativeByteBuffer buffer = new NativeByteBuffer(object.getObjectSize());
@@ -527,7 +527,7 @@ public class ConnectionsManager extends BaseController {
         }
         String installer = "";
         try {
-            installer = AyuConstants.BUILD_STORE_PACKAGE;
+            installer = OverConstants.BUILD_STORE_PACKAGE;
         } catch (Throwable ignore) {
 
         }
@@ -536,7 +536,7 @@ public class ConnectionsManager extends BaseController {
         }
         String packageId = "";
         try {
-            packageId = AyuConstants.BUILD_ORIGINAL_PACKAGE;
+            packageId = OverConstants.BUILD_ORIGINAL_PACKAGE;
         } catch (Throwable ignore) {
 
         }

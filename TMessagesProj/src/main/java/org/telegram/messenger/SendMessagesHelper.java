@@ -48,10 +48,10 @@ import androidx.collection.LongSparseArray;
 import androidx.core.view.inputmethod.InputContentInfoCompat;
 
 import com.exteragram.messenger.ExteraConfig;
-import com.radolyn.ayugram.AyuConfig;
-import com.radolyn.ayugram.AyuForwarder;
-import com.radolyn.ayugram.AyuUtils;
-import com.radolyn.ayugram.utils.AyuState;
+import com.overspend1.overgram.OverConfig;
+import com.overspend1.overgram.OverForwarder;
+import com.overspend1.overgram.OverUtils;
+import com.overspend1.overgram.utils.OverState;
 
 import org.json.JSONObject;
 import org.telegram.messenger.audioinfo.AudioInfo;
@@ -1680,8 +1680,8 @@ public class SendMessagesHelper extends BaseController implements NotificationCe
             return 0;
         }
 
-        // --- AyuGram scheduled hook
-        if (AyuConfig.useScheduledMessages && !DialogObject.isEncryptedDialog(peer) && scheduleDateOrig == 0) {
+        // --- Overgram scheduled hook
+        if (OverConfig.useScheduledMessages && !DialogObject.isEncryptedDialog(peer) && scheduleDateOrig == 0) {
             scheduleDateOrig = ConnectionsManager.getInstance(currentAccount).getCurrentTime() + 10; // min t = 10 sec
 
             // ..but here's the problem:
@@ -1689,35 +1689,35 @@ public class SendMessagesHelper extends BaseController implements NotificationCe
             // we have to ensure that we have a small window for an error
             scheduleDateOrig += 1; // 1 sec
 
-            AyuState.setAutomaticallyScheduled(true, 1);
+            OverState.setAutomaticallyScheduled(true, 1);
         }
         var scheduleDate = scheduleDateOrig;
 
-        var ayuForwardNeeded = AyuForwarder.isFullAyuForwardsNeeded(currentAccount, messages);
+        var ayuForwardNeeded = OverForwarder.isFullAyuForwardsNeeded(currentAccount, messages);
         if (ayuForwardNeeded) {
             new Thread(() -> {
                 try {
-                    AyuForwarder.forwardMessages(currentAccount, messages, peer, forwardFromMyName, hideCaption, notify, scheduleDate, replyToTopMsg);
+                    OverForwarder.forwardMessages(currentAccount, messages, peer, forwardFromMyName, hideCaption, notify, scheduleDate, replyToTopMsg);
                 } catch (Exception e) {
-                    Log.e("AyuGram", "Failed to forward messages", e);
+                    Log.e("Overgram", "Failed to forward messages", e);
                 }
             }).start();
             return 0;
         }
 
-        var ayuIntelligentForwardNeeded = AyuForwarder.isAyuForwardNeeded(messages);
+        var ayuIntelligentForwardNeeded = OverForwarder.isAyuForwardNeeded(messages);
         if (ayuIntelligentForwardNeeded) {
             new Thread(() -> {
                 try {
-                    AyuForwarder.intelligentForward(currentAccount, messages, peer, forwardFromMyName, hideCaption, notify, scheduleDate, replyToTopMsg);
+                    OverForwarder.intelligentForward(currentAccount, messages, peer, forwardFromMyName, hideCaption, notify, scheduleDate, replyToTopMsg);
                 } catch (Exception e) {
-                    Log.e("AyuGram", "Failed to forward messages", e);
+                    Log.e("Overgram", "Failed to forward messages", e);
                 }
             }).start();
             return 0;
         }
 
-        // --- AyuGram hook
+        // --- Overgram hook
 
         int sendResult = 0;
         long myId = getUserConfig().getClientUserId();
@@ -3386,8 +3386,8 @@ public class SendMessagesHelper extends BaseController implements NotificationCe
             caption = "";
         }
 
-        // --- AyuGram scheduled hook
-        if (AyuConfig.useScheduledMessages && !DialogObject.isEncryptedDialog(peer) && scheduleDate == 0) {
+        // --- Overgram scheduled hook
+        if (OverConfig.useScheduledMessages && !DialogObject.isEncryptedDialog(peer) && scheduleDate == 0) {
             scheduleDate = ConnectionsManager.getInstance(currentAccount).getCurrentTime() + 10; // min t = 10 sec
 
             // ..but here's the problem:
@@ -3401,7 +3401,7 @@ public class SendMessagesHelper extends BaseController implements NotificationCe
                 scheduleDate += 10;
             }
 
-            AyuState.setAutomaticallyScheduled(true, 1);
+            OverState.setAutomaticallyScheduled(true, 1);
         }
 
         // user can't reply to deleted messages
@@ -3422,7 +3422,7 @@ public class SendMessagesHelper extends BaseController implements NotificationCe
                     name += "\n";
                 }
 
-                var prefix = name + "> " + AyuUtils.shortify(replyToMsg.messageText, 20);
+                var prefix = name + "> " + OverUtils.shortify(replyToMsg.messageText, 20);
 
                 if (!TextUtils.isEmpty(message)) {
                     message = prefix + "\n\n" + message;
@@ -3432,12 +3432,12 @@ public class SendMessagesHelper extends BaseController implements NotificationCe
                     caption = prefix;
                 }
 
-                AyuUtils.shiftEntities(entities, prefix.length());
+                OverUtils.shiftEntities(entities, prefix.length());
             }
 
             replyToMsg = null;
         }
-        // --- AyuGram hook
+        // --- Overgram hook
 
         String originalPath = null;
         if (params != null && params.containsKey("originalPath")) {

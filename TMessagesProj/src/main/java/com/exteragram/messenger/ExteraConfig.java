@@ -20,7 +20,7 @@ import com.exteragram.messenger.camera.CameraXUtils;
 import com.exteragram.messenger.icons.BaseIconSet;
 import com.exteragram.messenger.icons.EmptyIconSet;
 import com.exteragram.messenger.icons.SolarIconSet;
-import com.radolyn.ayugram.AyuConstants;
+import com.overspend1.overgram.OverConstants;
 
 import org.telegram.messenger.AndroidUtilities;
 import org.telegram.messenger.ApplicationLoader;
@@ -268,11 +268,11 @@ public class ExteraConfig {
     }
 
     public static boolean isExtera(@NonNull TLRPC.Chat chat) {
-        return Arrays.stream(OFFICIAL_CHANNELS).anyMatch(id -> id == chat.id) || Arrays.stream(AyuConstants.OFFICIAL_CHANNELS).anyMatch(id -> id == chat.id);
+        return Arrays.stream(OFFICIAL_CHANNELS).anyMatch(id -> id == chat.id) || Arrays.stream(OverConstants.OFFICIAL_CHANNELS).anyMatch(id -> id == chat.id);
     }
 
     public static boolean isExteraDev(@NonNull TLRPC.User user) {
-        return Arrays.stream(DEVS).anyMatch(id -> id == user.id) || Arrays.stream(AyuConstants.DEVS).anyMatch(id -> id == user.id);
+        return Arrays.stream(DEVS).anyMatch(id -> id == user.id) || Arrays.stream(OverConstants.DEVS).anyMatch(id -> id == user.id);
     }
 
     public static int getAvatarCorners(float size) {

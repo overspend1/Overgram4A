@@ -102,9 +102,9 @@ import com.exteragram.messenger.utils.AppUtils;
 import com.exteragram.messenger.utils.CanvasUtils;
 import com.exteragram.messenger.utils.ChatUtils;
 import com.exteragram.messenger.utils.LocaleUtils;
-import com.radolyn.ayugram.AyuConfig;
+import com.overspend1.overgram.OverConfig;
 
-import com.radolyn.ayugram.ui.preferences.AyuGramPreferencesActivity;
+import com.overspend1.overgram.ui.preferences.OvergramPreferencesActivity;
 import org.telegram.PhoneFormat.PhoneFormat;
 import org.telegram.messenger.AccountInstance;
 import org.telegram.messenger.AndroidUtilities;
@@ -3310,7 +3310,7 @@ public class ProfileActivity extends BaseFragment implements NotificationCenter.
             } else if (position == exteraRow) {
                 presentFragment(new MainPreferencesActivity());
             } else if (position == ayuRow) {
-                presentFragment(new AyuGramPreferencesActivity());
+                presentFragment(new OvergramPreferencesActivity());
             } else if (position == notificationRow) {
                 presentFragment(new NotificationsSettingsActivity());
             } else if (position == privacyRow) {
@@ -7556,7 +7556,7 @@ public class ProfileActivity extends BaseFragment implements NotificationCenter.
                         fallbackImage.setImage(ImageLocation.getForPhoto(smallSize, getUserInfo().fallback_photo), "50_50", (Drawable) null, 0, null, UserConfig.getInstance(currentAccount).getCurrentUser(), 0);
                     }
                 } else {
-                    if (!AyuConfig.sendReadPackets || AyuConfig.sendOfflinePacketAfterOnline) {
+                    if (!OverConfig.sendReadPackets || OverConfig.sendOfflinePacketAfterOnline) {
                         newString2 = LocaleController.getString("LikelyOfflineStatus", R.string.LikelyOfflineStatus);
                     } else {
                         newString2 = LocaleController.getString("Online", R.string.Online);

@@ -112,16 +112,16 @@ import com.exteragram.messenger.boost.BoostController;
 import com.exteragram.messenger.boost.encryption.EncryptionHelper;
 import com.google.android.exoplayer2.ui.AspectRatioFrameLayout;
 import com.google.zxing.common.detector.MathUtils;
-import com.radolyn.ayugram.AyuConfig;
-import com.radolyn.ayugram.AyuConstants;
-import com.radolyn.ayugram.AyuFilter;
-import com.radolyn.ayugram.AyuUtils;
-import com.radolyn.ayugram.messages.AyuMessagesController;
-import com.radolyn.ayugram.proprietary.AyuHistoryHook;
-import com.radolyn.ayugram.ui.DummyView;
-import com.radolyn.ayugram.utils.AyuState;
-import com.radolyn.ayugram.utils.AyuGhostUtils;
-import com.radolyn.ayugram.ui.AyuMessageHistory;
+import com.overspend1.overgram.OverConfig;
+import com.overspend1.overgram.OverConstants;
+import com.overspend1.overgram.OverFilter;
+import com.overspend1.overgram.OverUtils;
+import com.overspend1.overgram.messages.OverMessagesController;
+import com.overspend1.overgram.proprietary.OverHistoryHook;
+import com.overspend1.overgram.ui.DummyView;
+import com.overspend1.overgram.utils.OverState;
+import com.overspend1.overgram.utils.OverGhostUtils;
+import com.overspend1.overgram.ui.OverMessageHistory;
 
 import org.telegram.PhoneFormat.PhoneFormat;
 import org.telegram.messenger.AccountInstance;
@@ -987,7 +987,7 @@ public class ChatActivity extends BaseFragment implements NotificationCenter.Not
     private final static int OPTION_HISTORY = 205;
 
     private final static int[] allowedNotificationsDuringChatListAnimations = new int[]{
-            AyuConstants.MESSAGES_DELETED_NOTIFICATION,
+            OverConstants.MESSAGES_DELETED_NOTIFICATION,
 
             NotificationCenter.messagesRead,
             NotificationCenter.threadMessagesRead,
@@ -2406,7 +2406,7 @@ public class ChatActivity extends BaseFragment implements NotificationCenter.Not
         getNotificationCenter().addObserver(this, NotificationCenter.messageTranslated);
         getNotificationCenter().addObserver(this, NotificationCenter.messageTranslating);
 
-        getNotificationCenter().addObserver(this, AyuConstants.MESSAGES_DELETED_NOTIFICATION);
+        getNotificationCenter().addObserver(this, OverConstants.MESSAGES_DELETED_NOTIFICATION);
 
         super.onFragmentCreate();
 
@@ -2763,7 +2763,7 @@ public class ChatActivity extends BaseFragment implements NotificationCenter.Not
         getNotificationCenter().removeObserver(this, NotificationCenter.messageTranslated);
         getNotificationCenter().removeObserver(this, NotificationCenter.messageTranslating);
 
-        getNotificationCenter().removeObserver(this, AyuConstants.MESSAGES_DELETED_NOTIFICATION);
+        getNotificationCenter().removeObserver(this, OverConstants.MESSAGES_DELETED_NOTIFICATION);
 
         if (currentEncryptedChat != null) {
             getNotificationCenter().removeObserver(this, NotificationCenter.didVerifyMessagesStickers);
@@ -9813,7 +9813,7 @@ public class ChatActivity extends BaseFragment implements NotificationCenter.Not
     }
 
     private void openScheduledMessages() {
-        if (AyuState.getAutomaticallyScheduled()) {
+        if (OverState.getAutomaticallyScheduled()) {
             return;
         }
         if (parentLayout == null || parentLayout.getLastFragment() != this) {
@@ -10909,7 +10909,7 @@ public class ChatActivity extends BaseFragment implements NotificationCenter.Not
         }
         int result = getSendMessagesHelper().sendMessage(arrayList, dialog_id, fromMyName, hideCaption, notify, scheduleDate, getThreadMessage());
         AlertsCreator.showSendMediaAlert(result, this, themeDelegate);
-        if (result != 0 || AyuState.getAutomaticallyScheduled()) {
+        if (result != 0 || OverState.getAutomaticallyScheduled()) {
             AndroidUtilities.runOnUIThread(() -> {
                 waitingForSendingMessageLoad = false;
                 hideFieldPanel(true);
@@ -15792,7 +15792,7 @@ public class ChatActivity extends BaseFragment implements NotificationCenter.Not
                 }
             }
 
-            // --- AyuGram hook main
+            // --- Overgram hook main
             var dialogId = getDialogId();
             var topicId = getTopicId();
 
@@ -15805,7 +15805,7 @@ public class ChatActivity extends BaseFragment implements NotificationCenter.Not
 
             var limit = 500;
 
-            var msgIds = AyuHistoryHook.getMinAndMaxIds(messArr);
+            var msgIds = OverHistoryHook.getMinAndMaxIds(messArr);
 
             if (!DialogObject.isEncryptedDialog(dialogId)) {
                 if (!messArr.isEmpty()) {
@@ -15832,7 +15832,7 @@ public class ChatActivity extends BaseFragment implements NotificationCenter.Not
                         endId = maxVal;
                     } else if (messArr.size() == 1 && messArr.get(0).messageOwner instanceof TLRPC.TL_messageService) {
                         startId = minVal;
-                        endId = AyuUtils.getMinRealId(messages);
+                        endId = OverUtils.getMinRealId(messages);
                     }
                     // allows loading messages that are uppermore than the dialog
                     else if (messArr.size() < count && !isCache && (load_type == 2 || load_type == 1) && !messArr.isEmpty()) {
@@ -15842,7 +15842,7 @@ public class ChatActivity extends BaseFragment implements NotificationCenter.Not
                 } else {
                     if (!messages.isEmpty()) { // for loading uppermore
                         startId = minVal;
-                        endId = AyuUtils.getMinRealId(messages);
+                        endId = OverUtils.getMinRealId(messages);
                     }
 
                     if (isCache) {
@@ -15862,23 +15862,23 @@ public class ChatActivity extends BaseFragment implements NotificationCenter.Not
                 if (Math.abs(secretStartId - secretEndId) == 1 || (secretStartId == msg1 && secretEndId == msg2)) { // empty dialog, so load as much as we can
                     startId = minVal;
                     endId = maxVal;
-                    Log.d("AyuGram", "case 1");
+                    Log.d("Overgram", "case 1");
                 } else if (secretStartId == msg1) { // loaded up to top
                     startId = minVal;
                     endId = msg2;
-                    Log.d("AyuGram", "case 2");
+                    Log.d("Overgram", "case 2");
                 } else if (secretEndId == msg2) { // loaded up to bottom
                     startId = msg1;
                     endId = maxVal;
-                    Log.d("AyuGram", "case 3");
+                    Log.d("Overgram", "case 3");
                 } else { // just between some messages
                     startId = msg1;
                     endId = msg2;
-                    Log.d("AyuGram", "case 4");
+                    Log.d("Overgram", "case 4");
                 }
 
-                Log.d("AyuGram", "omfg " + secretStartId + " " + secretEndId);
-                Log.d("AyuGram", "omfg2 " + msg1 + " " + msg2);
+                Log.d("Overgram", "omfg " + secretStartId + " " + secretEndId);
+                Log.d("Overgram", "omfg2 " + msg1 + " " + msg2);
             }
 
             if (startId > endId) {
@@ -15887,7 +15887,7 @@ public class ChatActivity extends BaseFragment implements NotificationCenter.Not
                 endId = t;
             }
 
-            Log.d("AyuGram",
+            Log.d("Overgram",
                     "messArr: " + messArr.size()
                     + " , startId: " + startId
                     + " , endId: " + endId
@@ -15899,12 +15899,12 @@ public class ChatActivity extends BaseFragment implements NotificationCenter.Not
             );
             if (!isInScheduleMode() && chatMode != MODE_PINNED && (startId != minVal || endId != minVal)) {
                 var needToReset = messArr.size() == count;
-                AyuHistoryHook.doHook(currentAccount, messArr, messagesDict, startId, endId, dialogId, limit, topicId, isSecretChat());
+                OverHistoryHook.doHook(currentAccount, messArr, messagesDict, startId, endId, dialogId, limit, topicId, isSecretChat());
                 if (needToReset) {
                     count = messArr.size();
                 }
             }
-            // --- AyuGram hook
+            // --- Overgram hook
 
             for (int a = 0; a < messArr.size(); a++) {
                 MessageObject obj = messArr.get(a);
@@ -18625,8 +18625,8 @@ public class ChatActivity extends BaseFragment implements NotificationCenter.Not
             updateTranslateItemVisibility();
         }
 
-        // --- AyuGram hook
-        if (id == AyuConstants.MESSAGES_DELETED_NOTIFICATION) {
+        // --- Overgram hook
+        if (id == OverConstants.MESSAGES_DELETED_NOTIFICATION) {
             long dialogId = (Long) args[0];
             if (getDialogId() != dialogId && (ChatObject.isChannel(currentChat) || dialogId != 0)) {
                 return;
@@ -18644,14 +18644,14 @@ public class ChatActivity extends BaseFragment implements NotificationCenter.Not
                 }
             }
 
-            if (AyuState.getHideSelection()) {
+            if (OverState.getHideSelection()) {
                 // thanks to the som fucking tg bug & poor design,
                 // I can't deselect messages rn
                 // neither they can deselect themselves
                 startMessageUnselect();
             }
         }
-        // --- AyuGram hook
+        // --- Overgram hook
     }
 
     private int getScrollingOffsetForView(View v) {
@@ -18876,7 +18876,7 @@ public class ChatActivity extends BaseFragment implements NotificationCenter.Not
             if (messageObject.sponsoredChannelPost != 0) {
                 messageId = messageObject.sponsoredChannelPost;
             }
-            if (!AyuConfig.disableAds) {
+            if (!OverConfig.disableAds) {
                 getMessagesController().ensureMessagesLoaded(dialogId, messageId, null);
             } else {
                 if (!messageObject.isSponsored()) {
@@ -18888,7 +18888,7 @@ public class ChatActivity extends BaseFragment implements NotificationCenter.Not
             }
         }
         sponsoredMessagesAdded = true;
-        if (!AyuConfig.disableAds) {
+        if (!OverConfig.disableAds) {
             sponsoredMessagesPostsBetween = res.posts_between != null ? res.posts_between : 0;
             if (notPushedSponsoredMessages != null) {
                 notPushedSponsoredMessages.clear();
@@ -19937,7 +19937,7 @@ public class ChatActivity extends BaseFragment implements NotificationCenter.Not
     }
 
     private int getSponsoredMessagesCount() {
-        if (!AyuConfig.disableAds) {
+        if (!OverConfig.disableAds) {
             int sponsoredMessagesCount = 0;
             while (sponsoredMessagesCount < messages.size()) {
                 if (!messages.get(sponsoredMessagesCount).isSponsored()) {
@@ -19991,8 +19991,8 @@ public class ChatActivity extends BaseFragment implements NotificationCenter.Not
         int commentsDeleted = 0;
         for (int a = 0; a < size; a++) {
             Integer mid = markAsDeletedMessages.get(a);
-            if (!AyuConfig.saveDeletedMessageFor(currentAccount, getDialogId()) || AyuState.isDeletePermitted(getDialogId(), mid)) {
-                AyuState.messageDeleted(getDialogId(), mid);
+            if (!OverConfig.saveDeletedMessageFor(currentAccount, getDialogId()) || OverState.isDeletePermitted(getDialogId(), mid)) {
+                OverState.messageDeleted(getDialogId(), mid);
             } else {
                 continue;
             }
@@ -23575,12 +23575,12 @@ public class ChatActivity extends BaseFragment implements NotificationCenter.Not
             groupedMessages = null;
         }
 
-        // --- AyuGram hack
+        // --- Overgram hack
         boolean isAyuDeleted =
                 message != null &&
                 message.messageOwner != null &&
                 message.messageOwner.ayuDeleted;
-        // --- AyuGram hack
+        // --- Overgram hack
 
         boolean allowChatActions = true;
         boolean allowPin;
@@ -23625,7 +23625,7 @@ public class ChatActivity extends BaseFragment implements NotificationCenter.Not
             allowChatActions = false;
         }
 
-        // --- AyuGram hack
+        // --- Overgram hack
 
         // restricts any actions with deleted messages
         // there's a chance Telegram will clean "Saved messages"
@@ -23636,7 +23636,7 @@ public class ChatActivity extends BaseFragment implements NotificationCenter.Not
             allowUnpin = false;
             allowEdit = false;
         }
-        // --- AyuGram hack
+        // --- Overgram hack
 
         if (single || type < 2 || type == 20) {
             if (getParentActivity() == null) {
@@ -24234,11 +24234,11 @@ public class ChatActivity extends BaseFragment implements NotificationCenter.Not
                 }
             }
 
-            /// --- AyuGram menu
+            /// --- Overgram menu
             if (message != null
                     && message.messageOwner.from_id != null
                     && message.messageOwner.from_id.user_id != getAccountInstance().getUserConfig().getClientUserId()
-                    && AyuMessagesController.getInstance().hasAnyRevisions(getAccountInstance().getUserConfig().getClientUserId(), dialog_id, message.messageOwner.id)
+                    && OverMessagesController.getInstance().hasAnyRevisions(getAccountInstance().getUserConfig().getClientUserId(), dialog_id, message.messageOwner.id)
             ) {
                 var idx = options.size() - 1;
 
@@ -24247,7 +24247,7 @@ public class ChatActivity extends BaseFragment implements NotificationCenter.Not
                 }
 
                 items.add(idx, LocaleController.getString("EditsHistoryMenuText", R.string.EditsHistoryMenuText));
-                options.add(idx, AyuConstants.OPTION_HISTORY);
+                options.add(idx, OverConstants.OPTION_HISTORY);
                 icons.add(idx, R.drawable.msg_log);
             }
 
@@ -24259,12 +24259,12 @@ public class ChatActivity extends BaseFragment implements NotificationCenter.Not
                 }
 
                 items.add(idx, "TTL: " + LocaleController.formatTTLString(message.messageOwner.ttl));
-                options.add(idx, AyuConstants.OPTION_TTL);
+                options.add(idx, OverConstants.OPTION_TTL);
                 icons.add(idx, R.drawable.msg_autodelete);
             }
 
             if (!(options.contains(OPTION_SAVE_TO_GALLERY) || options.contains(OPTION_SAVE_TO_GALLERY2))
-                    && AyuUtils.isMediaDownloadable(selectedObject, true)
+                    && OverUtils.isMediaDownloadable(selectedObject, true)
             ) {
                 var idx = options.size() - 1;
 
@@ -24277,7 +24277,7 @@ public class ChatActivity extends BaseFragment implements NotificationCenter.Not
                 icons.add(idx, R.drawable.msg_gallery);
             }
             if (!options.contains(OPTION_SAVE_TO_DOWNLOADS_OR_MUSIC)
-                    && AyuUtils.isMediaDownloadable(selectedObject, false)
+                    && OverUtils.isMediaDownloadable(selectedObject, false)
             ) {
                 var idx = options.size() - 1;
 
@@ -24294,16 +24294,16 @@ public class ChatActivity extends BaseFragment implements NotificationCenter.Not
                 icons.add(idx, R.drawable.msg_download);
             }
 
-            if (!AyuConfig.sendReadPackets && !isAyuDeleted
+            if (!OverConfig.sendReadPackets && !isAyuDeleted
                     && message != null
                     && message.messageOwner.from_id != null
                     && message.messageOwner.from_id.user_id != getAccountInstance().getUserConfig().getClientUserId()
             ) {
                 items.add(LocaleController.getString("ReadUntilMenuText", R.string.ReadUntilMenuText));
-                options.add(AyuConstants.OPTION_READ_UNTIL);
+                options.add(OverConstants.OPTION_READ_UNTIL);
                 icons.add(R.drawable.msg_view_file);
             }
-            // --- AyuGram menu
+            // --- Overgram menu
 
             if (options.isEmpty() && optionsView == null) {
                 return false;
@@ -25863,15 +25863,15 @@ public class ChatActivity extends BaseFragment implements NotificationCenter.Not
         }
         boolean preserveDim = false;
         switch (option) {
-            case AyuConstants.OPTION_HISTORY:
-                presentFragment(new AyuMessageHistory(selectedObject));
+            case OverConstants.OPTION_HISTORY:
+                presentFragment(new OverMessageHistory(selectedObject));
                 break;
-            case AyuConstants.OPTION_TTL:
-                AyuState.setAllowReadPacket(true, 1);
+            case OverConstants.OPTION_TTL:
+                OverState.setAllowReadPacket(true, 1);
                 sendSecretMessageRead(selectedObject, true);
                 break;
-            case AyuConstants.OPTION_READ_UNTIL:
-                AyuGhostUtils.markReadOnServer(currentAccount, selectedObject.messageOwner.id, getMessagesController().getInputPeer(selectedObject.messageOwner.peer_id));
+            case OverConstants.OPTION_READ_UNTIL:
+                OverGhostUtils.markReadOnServer(currentAccount, selectedObject.messageOwner.id, getMessagesController().getInputPeer(selectedObject.messageOwner.peer_id));
                 break;
             case OPTION_RETRY: {
                 if (selectedObjectGroup != null) {
@@ -28972,16 +28972,16 @@ public class ChatActivity extends BaseFragment implements NotificationCenter.Not
                 ArrayList<MessageObject> messages = isFrozen ? frozenMessages : ChatActivity.this.messages;
                 var msg = messages.get(position - messagesStartRow);
 
-                // --- AyuGram hook
-                if (AyuConfig.regexFiltersEnabled && (AyuConfig.regexFiltersInChats || ChatObject.isChannel(currentChat))) {
+                // --- Overgram hook
+                if (OverConfig.regexFiltersEnabled && (OverConfig.regexFiltersInChats || ChatObject.isChannel(currentChat))) {
                     var group = getGroup(msg.getGroupId());
                     var msgToCheck = group == null ? msg : group.findPrimaryMessageObject();
 
-                    if (AyuFilter.isFiltered(msgToCheck, group)) {
+                    if (OverFilter.isFiltered(msgToCheck, group)) {
                         return -1000;
                     }
                 }
-                // --- AyuGram hook
+                // --- Overgram hook
 
                 return msg.contentType;
             } else if (position == botInfoRow) {

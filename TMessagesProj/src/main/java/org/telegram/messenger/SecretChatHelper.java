@@ -16,10 +16,10 @@ import android.util.LongSparseArray;
 import android.util.SparseArray;
 import android.util.SparseIntArray;
 
-import com.radolyn.ayugram.AyuConfig;
-import com.radolyn.ayugram.AyuConstants;
-import com.radolyn.ayugram.messages.AyuMessagesController;
-import com.radolyn.ayugram.messages.AyuSavePreferences;
+import com.overspend1.overgram.OverConfig;
+import com.overspend1.overgram.OverConstants;
+import com.overspend1.overgram.messages.OverMessagesController;
+import com.overspend1.overgram.messages.OverSavePreferences;
 import org.telegram.SQLite.SQLiteCursor;
 import org.telegram.messenger.support.LongSparseIntArray;
 import org.telegram.tgnet.AbstractSerializedData;
@@ -117,9 +117,9 @@ public class SecretChatHelper extends BaseController {
         if (!pendingEncMessagesToDelete.isEmpty()) {
             ArrayList<Long> pendingEncMessagesToDeleteCopy = new ArrayList<>(pendingEncMessagesToDelete);
 
-            // --- AyuGram hook (secret)
+            // --- Overgram hook (secret)
 
-            if (AyuConfig.saveDeletedMessages) {
+            if (OverConfig.saveDeletedMessages) {
                 // save before because they will be removed when `runOnUIThread` happens
                 var dialogsWithMessageIds = getMessagesStorage().getMessageIdsByRandomIds(pendingEncMessagesToDeleteCopy);
                 var dialogsWithMessages = new LongSparseArray<ArrayList<TLRPC.Message>>();
@@ -146,18 +146,18 @@ public class SecretChatHelper extends BaseController {
                     var messages = dialogsWithMessages.valueAt(i);
 
                     for (var msg : messages) {
-                        var prefs = new AyuSavePreferences(msg, currentAccount);
+                        var prefs = new OverSavePreferences(msg, currentAccount);
                         prefs.setDialogId(dialogId);
-                        AyuMessagesController.getInstance().onMessageDeleted(prefs);
+                        OverMessagesController.getInstance().onMessageDeleted(prefs);
                     }
 
                     AndroidUtilities.runOnUIThread(() -> {
                         // invalidating views
-                        getNotificationCenter().postNotificationName(AyuConstants.MESSAGES_DELETED_NOTIFICATION, dialogId, dialogsWithMessageIds.get(dialogId));
+                        getNotificationCenter().postNotificationName(OverConstants.MESSAGES_DELETED_NOTIFICATION, dialogId, dialogsWithMessageIds.get(dialogId));
                     });
                 }
             }
-            // --- AyuGram hook
+            // --- Overgram hook
 
             AndroidUtilities.runOnUIThread(() -> {
                 for (int a = 0; a < pendingEncMessagesToDeleteCopy.size(); a++) {

@@ -177,7 +177,7 @@ public class EmuDetector {
     }
 
     public boolean detect() {
-        // AyuGram: remove emulator detection
+        // Overgram: remove emulator detection
         return false;
     }
 

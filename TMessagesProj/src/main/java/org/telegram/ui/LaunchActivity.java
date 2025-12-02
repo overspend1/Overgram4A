@@ -94,10 +94,10 @@ import com.google.android.gms.common.api.Status;
 import com.google.firebase.appindexing.Action;
 import com.google.firebase.appindexing.FirebaseUserActions;
 import com.google.firebase.appindexing.builders.AssistActionBuilder;
-import com.radolyn.ayugram.AyuConfig;
-import com.radolyn.ayugram.AyuConstants;
-import com.radolyn.ayugram.AyuCustomHandlers;
-import com.radolyn.ayugram.AyuUtils;
+import com.overspend1.overgram.OverConfig;
+import com.overspend1.overgram.OverConstants;
+import com.overspend1.overgram.OverCustomHandlers;
+import com.overspend1.overgram.OverUtils;
 
 import org.telegram.PhoneFormat.PhoneFormat;
 import org.telegram.messenger.AccountInstance;
@@ -634,23 +634,53 @@ public class LaunchActivity extends BasePermissionsActivity implements INavigati
                     drawerLayoutContainer.closeDrawer(false);
                 }
 
-                // --- AyuGram hook
-                if (id == AyuConstants.DRAWER_TOGGLE_GHOST && AyuConfig.showGhostToggleInDrawer) {
-                    var msg = AyuConfig.isGhostModeActive()
-                            ? LocaleController.getString("GhostModeDisabled", R.string.GhostModeDisabled)
-                            : LocaleController.getString("GhostModeEnabled", R.string.GhostModeEnabled);
+                // --- Overgram hook
+                if (id == OverConstants.DRAWER_TOGGLE_GHOST && OverConfig.showGhostToggleInDrawer) {
+                    // If ghost mode is currently active, disable it without warning
+                    if (OverConfig.isGhostModeActive()) {
+                        OverConfig.toggleGhostMode();
+                        BulletinFactory.of(getLastFragment()).createSuccessBulletin(
+                            LocaleController.getString("GhostModeDisabled", R.string.GhostModeDisabled)
+                        ).show();
+                        drawerLayoutContainer.closeDrawer(false);
+                        NotificationCenter.getInstance(UserConfig.selectedAccount).postNotificationName(NotificationCenter.mainUserInfoChanged);
+                    } else {
+                        // Show warning dialog before enabling ghost mode
+                        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+                        builder.setTitle(LocaleController.getString("GhostModeWarningTitle", R.string.GhostModeWarningTitle));
 
-                    AyuConfig.toggleGhostMode();
+                        // Create message with HTML formatting
+                        String message = LocaleController.getString("GhostModeWarningMessage", R.string.GhostModeWarningMessage);
+                        SpannableStringBuilder spannableMessage = new SpannableStringBuilder(AndroidUtilities.replaceTags(message));
 
-                    BulletinFactory.of(getLastFragment()).createSuccessBulletin(msg).show();
-                    drawerLayoutContainer.closeDrawer(false);
+                        builder.setMessage(spannableMessage);
+                        builder.setPositiveButton(LocaleController.getString("GhostModeWarningEnable", R.string.GhostModeWarningEnable), (dialog, which) -> {
+                            // User confirmed, enable ghost mode
+                            OverConfig.toggleGhostMode();
+                            BulletinFactory.of(getLastFragment()).createSuccessBulletin(
+                                LocaleController.getString("GhostModeEnabled", R.string.GhostModeEnabled)
+                            ).show();
+                            NotificationCenter.getInstance(UserConfig.selectedAccount).postNotificationName(NotificationCenter.mainUserInfoChanged);
+                        });
+                        builder.setNegativeButton(LocaleController.getString("GhostModeWarningCancel", R.string.GhostModeWarningCancel), null);
 
-                    // update button text
-                    NotificationCenter.getInstance(UserConfig.selectedAccount).postNotificationName(NotificationCenter.mainUserInfoChanged);
-                } else if (id == AyuConstants.DRAWER_KILL_APP) {
-                    AyuUtils.killApplication(this);
+                        AlertDialog dialog = builder.create();
+                        showDialog(dialog);
+
+                        // Make positive button red to emphasize danger
+                        dialog.setOnShowListener(dialogInterface -> {
+                            Button positiveButton = dialog.getButton(AlertDialog.BUTTON_POSITIVE);
+                            if (positiveButton != null) {
+                                positiveButton.setTextColor(Theme.getColor(Theme.key_text_RedBold));
+                            }
+                        });
+
+                        drawerLayoutContainer.closeDrawer(false);
+                    }
+                } else if (id == OverConstants.DRAWER_KILL_APP) {
+                    OverUtils.killApplication(this);
                 }
-                // --- AyuGram hook
+                // --- Overgram hook
             }
         });
         final ItemTouchHelper sideMenuTouchHelper = new ItemTouchHelper(new ItemTouchHelper.SimpleCallback(ItemTouchHelper.UP | ItemTouchHelper.DOWN, 0) {
@@ -2665,9 +2695,9 @@ public class LaunchActivity extends BasePermissionsActivity implements INavigati
                                     } else if ((url.startsWith("tg:update") || url.startsWith("tg://update"))) {
                                         checkUpdates = true;
                                     } else if ((url.startsWith("tg:ayu") || url.startsWith("tg://ayu"))) {
-                                        AyuCustomHandlers.handleAyu(getLastFragment());
+                                        OverCustomHandlers.handleAyu(getLastFragment());
                                     } else if ((url.startsWith("tg:xiaomi") || url.startsWith("tg://xiaomi"))) {
-                                        AyuCustomHandlers.handleXiaomi(getLastFragment());
+                                        OverCustomHandlers.handleXiaomi(getLastFragment());
                                     } else {
                                         unsupportedUrl = url.replace("tg://", "").replace("tg:", "");
                                         int index;
@@ -2757,7 +2787,7 @@ public class LaunchActivity extends BasePermissionsActivity implements INavigati
                 } else if (intent.getAction().equals("new_dialog")) {
                     open_new_dialog = 1;
                 } else if (intent.getAction().equals("ghost_mode")) {
-                    AyuConfig.setGhostMode(true);
+                    OverConfig.setGhostMode(true);
 
                     // update button text
                     NotificationCenter.getInstance(UserConfig.selectedAccount).postNotificationName(NotificationCenter.mainUserInfoChanged);
@@ -5072,7 +5102,7 @@ public class LaunchActivity extends BasePermissionsActivity implements INavigati
         }
         TLRPC.TL_help_getAppUpdate req = new TLRPC.TL_help_getAppUpdate();
         try {
-            req.source = AyuConstants.BUILD_STORE_PACKAGE;
+            req.source = OverConstants.BUILD_STORE_PACKAGE;
         } catch (Exception ignore) {
 
         }

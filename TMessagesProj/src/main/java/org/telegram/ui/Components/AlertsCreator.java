@@ -63,10 +63,10 @@ import androidx.annotation.RawRes;
 import androidx.annotation.RequiresApi;
 import androidx.core.util.Consumer;
 
-import com.radolyn.ayugram.AyuConstants;
-import com.radolyn.ayugram.messages.AyuMessagesController;
-import com.radolyn.ayugram.messages.AyuSavePreferences;
-import com.radolyn.ayugram.utils.AyuState;
+import com.overspend1.overgram.OverConstants;
+import com.overspend1.overgram.messages.OverMessagesController;
+import com.overspend1.overgram.messages.OverSavePreferences;
+import com.overspend1.overgram.utils.OverState;
 import org.telegram.messenger.AccountInstance;
 import org.telegram.messenger.AndroidUtilities;
 import org.telegram.messenger.ApplicationLoader;
@@ -5363,9 +5363,9 @@ public class AlertsCreator {
             count = selectedMessages[0].size() + selectedMessages[1].size();
         }
 
-        // --- AyuGram hook
+        // --- Overgram hook
         FrameLayout ayuFrameLayout = null;
-        // --- AyuGram hook
+        // --- Overgram hook
 
         long dialogId;
         if (encryptedChat != null) {
@@ -5619,7 +5619,7 @@ public class AlertsCreator {
             }
         }
 
-        // --- AyuGram hook
+        // --- Overgram hook
         final boolean[] keepLocally = {false};
 
         if (ayuFrameLayout == null) {
@@ -5641,13 +5641,13 @@ public class AlertsCreator {
             keepLocally[0] = !keepLocally[0];
             cell1.setChecked(keepLocally[0], true);
         });
-        // --- AyuGram hook
+        // --- Overgram hook
 
         final TLRPC.User userFinal = actionUser;
         final TLRPC.Chat chatFinal = actionChat;
         builder.setPositiveButton(LocaleController.getString("Delete", R.string.Delete), (dialogInterface, i) -> {
             if (keepLocally[0]) {
-                AyuState.setHideSelection(true, 1);
+                OverState.setHideSelection(true, 1);
             }
 
             ArrayList<Integer> ids = null;
@@ -5660,11 +5660,11 @@ public class AlertsCreator {
                         ids.add(messageObject.getId());
 
                         if (!keepLocally[0]) {
-                            AyuState.permitDeleteMessage(dialogId, messageObject.getId());
+                            OverState.permitDeleteMessage(dialogId, messageObject.getId());
                         } else {
-                            var prefs = new AyuSavePreferences(messageObject.messageOwner, currentAccount);
+                            var prefs = new OverSavePreferences(messageObject.messageOwner, currentAccount);
                             prefs.setDialogId(dialogId);
-                            AyuMessagesController.getInstance().onMessageDeleted(prefs);
+                            OverMessagesController.getInstance().onMessageDeleted(prefs);
                         }
 
                         if (encryptedChat != null && messageObject.messageOwner.random_id != 0 && messageObject.type != 10) {
@@ -5678,11 +5678,11 @@ public class AlertsCreator {
                     ids.add(selectedMessage.getId());
 
                     if (!keepLocally[0]) {
-                        AyuState.permitDeleteMessage(dialogId, selectedMessage.getId());
+                        OverState.permitDeleteMessage(dialogId, selectedMessage.getId());
                     } else {
-                        var prefs = new AyuSavePreferences(selectedMessage.messageOwner, currentAccount);
+                        var prefs = new OverSavePreferences(selectedMessage.messageOwner, currentAccount);
                         prefs.setDialogId(dialogId);
-                        AyuMessagesController.getInstance().onMessageDeleted(prefs);
+                        OverMessagesController.getInstance().onMessageDeleted(prefs);
                     }
 
                     if (encryptedChat != null && selectedMessage.messageOwner.random_id != 0 && selectedMessage.type != 10) {
@@ -5694,7 +5694,7 @@ public class AlertsCreator {
                 ArrayList<Integer> finalIds = ids;
                 AndroidUtilities.runOnUIThread(() -> {
                     // invalidating views
-                    NotificationCenter.getInstance(currentAccount).postNotificationName(AyuConstants.MESSAGES_DELETED_NOTIFICATION, dialogId, finalIds);
+                    NotificationCenter.getInstance(currentAccount).postNotificationName(OverConstants.MESSAGES_DELETED_NOTIFICATION, dialogId, finalIds);
                 });
 
                 MessagesController.getInstance(currentAccount).deleteMessages(ids, random_ids, encryptedChat, dialogId, deleteForAll[0], scheduled);
@@ -5705,13 +5705,13 @@ public class AlertsCreator {
                         ids.add(selectedMessages[a].keyAt(b));
 
                         if (!keepLocally[0]) {
-                            AyuState.permitDeleteMessage(dialogId, selectedMessages[a].keyAt(b));
+                            OverState.permitDeleteMessage(dialogId, selectedMessages[a].keyAt(b));
                         } else {
                             var val = selectedMessages[a].valueAt(b);
                             if (val != null) {
-                                var prefs = new AyuSavePreferences(val.messageOwner, currentAccount);
+                                var prefs = new OverSavePreferences(val.messageOwner, currentAccount);
                                 prefs.setDialogId(dialogId);
-                                AyuMessagesController.getInstance().onMessageDeleted(prefs);
+                                OverMessagesController.getInstance().onMessageDeleted(prefs);
                             }
                         }
                     }
@@ -5736,7 +5736,7 @@ public class AlertsCreator {
                     ArrayList<Integer> finalIds = ids;
                     AndroidUtilities.runOnUIThread(() -> {
                         // invalidating views
-                        NotificationCenter.getInstance(currentAccount).postNotificationName(AyuConstants.MESSAGES_DELETED_NOTIFICATION, dialogId, finalIds);
+                        NotificationCenter.getInstance(currentAccount).postNotificationName(OverConstants.MESSAGES_DELETED_NOTIFICATION, dialogId, finalIds);
                     });
 
                     MessagesController.getInstance(currentAccount).deleteMessages(ids, random_ids, encryptedChat, dialogId, deleteForAll[0], scheduled);

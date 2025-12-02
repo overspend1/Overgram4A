@@ -27,7 +27,7 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.exteragram.messenger.preferences.components.HeaderSettingsCell;
 import com.exteragram.messenger.preferences.updater.UpdaterBottomSheet;
-import com.radolyn.ayugram.ui.preferences.AyuGramPreferencesActivity;
+import com.overspend1.overgram.ui.preferences.OvergramPreferencesActivity;
 
 import org.telegram.messenger.AndroidUtilities;
 import org.telegram.messenger.BuildVars;
@@ -215,13 +215,13 @@ public class MainPreferencesActivity extends BasePreferencesActivity {
             if (!BuildVars.PM_BUILD)
                 (new UpdaterBottomSheet(getParentActivity(), this, false, null)).show();
         } else if (position == sourceCodeRow) {
-            Browser.openUrl(getParentActivity(), "https://github.com/AyuGram/AyuGram4A");
+            Browser.openUrl(getParentActivity(), "https://github.com/Overgram/Overgram4A");
         } else if (position == channelRow) {
-            MessagesController.getInstance(currentAccount).openByUserName(("ayugram1338"), this, 1);
+            MessagesController.getInstance(currentAccount).openByUserName(("overgram1338"), this, 1);
         } else if (position == groupRow) {
-            MessagesController.getInstance(currentAccount).openByUserName(("ayugramchat"), this, 1);
+            MessagesController.getInstance(currentAccount).openByUserName(("overgramchat"), this, 1);
         } else if (position == crowdinRow) {
-            Browser.openUrl(getParentActivity(), "https://crowdin.com/project/ayugram");
+            Browser.openUrl(getParentActivity(), "https://crowdin.com/project/overgram");
         } else if (position == appearanceRow) {
             presentFragment(new AppearancePreferencesActivity());
         } else if (position == chatsRow) {
@@ -276,9 +276,9 @@ public class MainPreferencesActivity extends BasePreferencesActivity {
                     } else if (position == otherRow) {
                         textCell.setTextAndIcon(LocaleController.getString("LocalOther", R.string.LocalOther), R.drawable.msg_fave, false);
                     }else if (position == channelRow) {
-                        textCell.setTextAndValueAndIcon(LocaleController.getString("Channel", R.string.Channel), "@ayugram1338", R.drawable.msg_channel, true);
+                        textCell.setTextAndValueAndIcon(LocaleController.getString("Channel", R.string.Channel), "@overgram1338", R.drawable.msg_channel, true);
                     } else if (position == groupRow) {
-                        textCell.setTextAndValueAndIcon(LocaleController.getString("SearchAllChatsShort", R.string.SearchAllChatsShort), "@ayugramchat", R.drawable.msg_groups, true);
+                        textCell.setTextAndValueAndIcon(LocaleController.getString("SearchAllChatsShort", R.string.SearchAllChatsShort), "@overgramchat", R.drawable.msg_groups, true);
                     } else if (position == crowdinRow) {
                         textCell.setTextAndValueAndIcon(LocaleController.getString("Crowdin", R.string.Crowdin), "Crowdin", R.drawable.msg_translate, true);
                     } else if (position == sourceCodeRow) {

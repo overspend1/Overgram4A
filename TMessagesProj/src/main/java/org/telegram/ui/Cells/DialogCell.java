@@ -49,8 +49,8 @@ import androidx.collection.LongSparseArray;
 import androidx.core.content.ContextCompat;
 import androidx.core.graphics.ColorUtils;
 
-import com.radolyn.ayugram.AyuFilter;
-import com.radolyn.ayugram.AyuUtils;
+import com.overspend1.overgram.OverFilter;
+import com.overspend1.overgram.OverUtils;
 import org.telegram.messenger.AndroidUtilities;
 import org.telegram.messenger.ApplicationLoader;
 import org.telegram.messenger.ChatObject;
@@ -2948,11 +2948,11 @@ public class DialogCell extends BaseCell {
             //requestLayout();
         }
 
-        // --- AyuGram hook
-        if (AyuFilter.isFiltered(message, null)) {
-            AyuUtils.blurify(message);
+        // --- Overgram hook
+        if (OverFilter.isFiltered(message, null)) {
+            OverUtils.blurify(message);
         }
-        // --- AyuGram hook
+        // --- Overgram hook
 
         if (!animated) {
             dialogMutedProgress = (dialogMuted || drawUnmute) ? 1f : 0f;

@@ -23,7 +23,7 @@ import androidx.core.content.FileProvider;
 
 import com.exteragram.messenger.utils.ChatUtils;
 import com.google.zxing.Dimension;
-import com.radolyn.ayugram.messages.AyuMessagesController;
+import com.overspend1.overgram.messages.OverMessagesController;
 
 import org.telegram.messenger.AccountInstance;
 import org.telegram.messenger.AndroidUtilities;
@@ -91,18 +91,18 @@ public class MessageDetailsPopupWrapper {
             items.add(new Item(R.drawable.msg_calendar2, LocaleController.getString(R.string.Date), formatTime(messageObject.messageOwner.date, true)));
         }
 
-        // --- AyuGram hook
+        // --- Overgram hook
 
         if (messageObject.messageOwner.ayuDeleted) {
             var userId = AccountInstance.getInstance(UserConfig.selectedAccount).getUserConfig().clientUserId;
-            var deleted = AyuMessagesController.getInstance().getMessage(userId, messageObject.messageOwner.dialog_id, messageObject.messageOwner.id);
+            var deleted = OverMessagesController.getInstance().getMessage(userId, messageObject.messageOwner.dialog_id, messageObject.messageOwner.id);
 
             if (deleted != null && deleted.message != null) {
                 items.add(new Item(R.drawable.msg_calendar2, LocaleController.getString(R.string.DeleteDateMenuText), formatTime(deleted.message.entityCreateDate, true)));
             }
         }
 
-        // --- AyuGram hook
+        // --- Overgram hook
 
         if (messageObject.messageOwner.fwd_from != null && messageObject.messageOwner.fwd_from.date > 0 && messageObject.messageOwner.fwd_from.date != messageObject.messageOwner.date) {
             items.add(new Item(R.drawable.msg_recent, LocaleController.getString(R.string.ForwardedDate), formatTime(messageObject.messageOwner.fwd_from.date, true)));

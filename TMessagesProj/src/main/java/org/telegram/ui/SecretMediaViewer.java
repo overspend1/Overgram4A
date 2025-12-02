@@ -46,7 +46,7 @@ import com.google.android.exoplayer2.C;
 import com.google.android.exoplayer2.ExoPlayer;
 import com.google.android.exoplayer2.ui.AspectRatioFrameLayout;
 
-import com.radolyn.ayugram.AyuConfig;
+import com.overspend1.overgram.OverConfig;
 import org.telegram.messenger.AndroidUtilities;
 import org.telegram.messenger.ImageLocation;
 import org.telegram.messenger.ImageReceiver;
@@ -359,11 +359,11 @@ public class SecretMediaViewer implements NotificationCenter.NotificationCenterD
             if (scheduled) {
                 return;
             }
-            // --- AyuGram hook
-            if (AyuConfig.saveDeletedMessages) {
+            // --- Overgram hook
+            if (OverConfig.saveDeletedMessages) {
                 return;
             }
-            // --- AyuGram hook
+            // --- Overgram hook
             if (currentMessageObject == null) {
                 return;
             }

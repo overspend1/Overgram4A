@@ -79,7 +79,7 @@ import androidx.core.graphics.ColorUtils;
 import androidx.core.math.MathUtils;
 
 import com.exteragram.messenger.ExteraConfig;
-import com.radolyn.ayugram.AyuConfig;
+import com.overspend1.overgram.OverConfig;
 
 import org.telegram.PhoneFormat.PhoneFormat;
 import org.telegram.messenger.AccountInstance;
@@ -12249,12 +12249,12 @@ public class ChatMessageCell extends BaseCell implements SeekBar.SeekBarDelegate
         } else if (currentMessageObject.scheduled && currentMessageObject.messageOwner.date == 0x7FFFFFFE) {
             timeString = "";
         } else if (edited && !ayuDeleted) {
-            timeString = AyuConfig.getEditedMark() + " " + LocaleController.getInstance().formatterDay.format((long) (messageObject.messageOwner.date) * 1000);
+            timeString = OverConfig.getEditedMark() + " " + LocaleController.getInstance().formatterDay.format((long) (messageObject.messageOwner.date) * 1000);
         } else if (!edited && ayuDeleted) {
-            timeString = AyuConfig.getDeletedMark() + " " + LocaleController.getInstance().formatterDay.format((long) (messageObject.messageOwner.date) * 1000);
+            timeString = OverConfig.getDeletedMark() + " " + LocaleController.getInstance().formatterDay.format((long) (messageObject.messageOwner.date) * 1000);
         } else if (edited && ayuDeleted) {
             // it's both edited and deleted
-            timeString = AyuConfig.getEditedMark() + " (" + AyuConfig.getDeletedMark() + ")" + " " + LocaleController.getInstance().formatterDay.format((long) (messageObject.messageOwner.date) * 1000);
+            timeString = OverConfig.getEditedMark() + " (" + OverConfig.getDeletedMark() + ")" + " " + LocaleController.getInstance().formatterDay.format((long) (messageObject.messageOwner.date) * 1000);
         } else {
             timeString = LocaleController.getInstance().formatterDay.format((long) (messageObject.messageOwner.date) * 1000);
         }
@@ -19123,12 +19123,12 @@ public class ChatMessageCell extends BaseCell implements SeekBar.SeekBarDelegate
             if ((edited || ayuDeleted) && !lastDrawingEdited && timeLayout != null) {
                 String editedStr;
                 if (edited && !ayuDeleted){
-                    editedStr = AyuConfig.getEditedMark();
+                    editedStr = OverConfig.getEditedMark();
                 } else if (!edited) {
-                    editedStr = AyuConfig.getDeletedMark();
+                    editedStr = OverConfig.getDeletedMark();
                 } else {
                     // it's both edited and deleted
-                    editedStr = AyuConfig.getEditedMark() + " (" + AyuConfig.getDeletedMark() + ")";
+                    editedStr = OverConfig.getEditedMark() + " (" + OverConfig.getDeletedMark() + ")";
                 }
                 CharSequence text = timeLayout.getText();
                 int i = text.toString().indexOf(editedStr);

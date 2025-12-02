@@ -2,7 +2,7 @@ package org.telegram.messenger;
 
 import android.os.SystemClock;
 
-import com.radolyn.ayugram.AyuConstants;
+import com.overspend1.overgram.OverConstants;
 
 import org.telegram.tgnet.RequestDelegate;
 import org.telegram.tgnet.TLObject;
@@ -444,7 +444,7 @@ public class FileRefController extends BaseController {
             } else if ("update".equals(string)) {
                 TLRPC.TL_help_getAppUpdate req = new TLRPC.TL_help_getAppUpdate();
                 try {
-                    req.source = AyuConstants.BUILD_STORE_PACKAGE;
+                    req.source = OverConstants.BUILD_STORE_PACKAGE;
                 } catch (Exception ignore) {
 
                 }
