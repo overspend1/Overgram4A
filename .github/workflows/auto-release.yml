@@ -16,6 +16,8 @@ permissions:
 
 env:
   GRADLE_OPTS: "-Dorg.gradle.daemon=false -Dorg.gradle.parallel=true -Dorg.gradle.caching=true"
+  ANDROID_SDK_ROOT: /usr/local/lib/android/sdk
+  ANDROID_HOME: /usr/local/lib/android/sdk
 
 jobs:
   build-and-release:
@@ -40,8 +42,30 @@ jobs:
         uses: android-actions/setup-android@v3
         with:
           packages: |
+            platform-tools
             platforms;android-33
             build-tools;33.0.2
+            ndk;21.4.7075529
+            cmake;3.22.1
+
+      - name: Create build config files
+        env:
+          APP_ID: ${{ secrets.APP_ID }}
+          APP_HASH: ${{ secrets.APP_HASH }}
+          MAPS_V2_API: ${{ secrets.MAPS_V2_API }}
+          SIGNING_KEY_PASSWORD: ${{ secrets.SIGNING_KEY_PASSWORD }}
+          SIGNING_KEY_ALIAS: ${{ secrets.SIGNING_KEY_ALIAS }}
+          SIGNING_KEY_STORE_PASSWORD: ${{ secrets.SIGNING_KEY_STORE_PASSWORD }}
+        run: |
+          echo "sdk.dir=${ANDROID_HOME:-$ANDROID_SDK_ROOT}" > local.properties
+          cat > API_KEYS <<EOF
+          APP_ID=${APP_ID:-26796489}
+          APP_HASH="${APP_HASH:-1aa77ae19cb7295735e896b6a6712bdd}"
+          MAPS_V2_API="${MAPS_V2_API:-AIzaSyDummyKeyForLocalBuild}"
+          SIGNING_KEY_PASSWORD=${SIGNING_KEY_PASSWORD:-overgram123}
+          SIGNING_KEY_ALIAS=${SIGNING_KEY_ALIAS:-overgram}
+          SIGNING_KEY_STORE_PASSWORD=${SIGNING_KEY_STORE_PASSWORD:-overgram123}
+          EOF
 
       - name: Grant execute permission for gradlew
         run: chmod +x gradlew
