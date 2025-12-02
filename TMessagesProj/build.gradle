@@ -243,3 +243,6 @@ configurations.implementation {
 
 apply plugin: 'com.google.gms.google-services'
 apply plugin: 'com.google.firebase.crashlytics'
+
+// Disable Crashlytics mapping uploads for local/CI builds without creds/network
+tasks.matching { it.name.startsWith("uploadCrashlytics") }.configureEach { it.enabled = false }
