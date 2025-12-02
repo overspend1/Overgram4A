@@ -40,8 +40,10 @@ jobs:
 
       - name: Set up Android SDK
         uses: android-actions/setup-android@v3
-        with:
-          packages: platform-tools,platforms;android-33,build-tools;33.0.2,ndk;21.4.7075529,cmake;3.22.1
+
+      - name: Install Android SDK packages
+        run: |
+          sdkmanager "platform-tools" "platforms;android-33" "build-tools;33.0.2" "ndk;21.4.7075529" "cmake;3.22.1"
 
       - name: Create build config files
         env:
