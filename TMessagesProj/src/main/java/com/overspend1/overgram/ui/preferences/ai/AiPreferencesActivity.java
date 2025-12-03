@@ -106,7 +106,7 @@ public class AiPreferencesActivity extends BasePreferencesActivity {
                         textCell.setTextAndValue(LocaleController.getString(R.string.OvergramGeminiModelTitle), OverConfig.geminiModel, true);
                     }
                     break;
-                case 4:
+                case 5:
                     TextCheckCell checkCell = (TextCheckCell) holder.itemView;
                     if (position == enableGeminiRow) {
                         checkCell.setTextAndCheck(LocaleController.getString(R.string.OvergramGeminiEnable), OverConfig.geminiEnabled, true);
@@ -126,7 +126,7 @@ public class AiPreferencesActivity extends BasePreferencesActivity {
             } else if (position == apiKeyRow || position == modelRow) {
                 return 3;
             }
-            return 4;
+            return 5;
         }
     }
 }

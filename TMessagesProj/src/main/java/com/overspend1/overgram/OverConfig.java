@@ -154,12 +154,13 @@ public class OverConfig {
             WALMode = preferences.getBoolean("walMode", true);
 
             // ~ Liquid Glass
-            liquidGlassEnabled = preferences.getBoolean("liquidGlassEnabled", false);
+            // Liquid glass defaults: on, moderate blur, applied broadly
+            liquidGlassEnabled = preferences.getBoolean("liquidGlassEnabled", true);
             liquidGlassApplyToChatBubbles = preferences.getBoolean("liquidGlassApplyToChatBubbles", true);
-            liquidGlassApplyToDialogs = preferences.getBoolean("liquidGlassApplyToDialogs", false);
+            liquidGlassApplyToDialogs = preferences.getBoolean("liquidGlassApplyToDialogs", true);
             liquidGlassPreset = preferences.getInt("liquidGlassPreset", 1); // Default: STANDARD
-            liquidGlassBlurRadius = preferences.getFloat("liquidGlassBlurRadius", 15f);
-            liquidGlassOpacity = preferences.getFloat("liquidGlassOpacity", 0.75f);
+            liquidGlassBlurRadius = preferences.getFloat("liquidGlassBlurRadius", 10f);
+            liquidGlassOpacity = preferences.getFloat("liquidGlassOpacity", 0.78f);
 
             // AI
             geminiEnabled = preferences.getBoolean("geminiEnabled", false);

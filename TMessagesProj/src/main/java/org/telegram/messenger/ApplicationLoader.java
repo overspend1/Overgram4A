@@ -382,17 +382,14 @@ public class ApplicationLoader extends Application {
         }
     }
 
+    // Firebase disabled (no init to avoid crashes when API keys are absent)
     private static FirebaseAnalytics firebaseAnalytics;
     private static FirebaseCrashlytics firebaseCrashlytics;
 
     private void initFirebase() {
-        AndroidUtilities.runOnUIThread(() -> {
-            firebaseAnalytics = FirebaseAnalytics.getInstance(this);
-            firebaseCrashlytics = FirebaseCrashlytics.getInstance();
-            firebaseAnalytics.setAnalyticsCollectionEnabled(ExteraConfig.useGoogleAnalytics);
-            firebaseCrashlytics.setCrashlyticsCollectionEnabled(ExteraConfig.useGoogleCrashlytics);
-            CrashlyticsUtils.logEvents(applicationContext);
-        });
+        // no-op
+        firebaseAnalytics = null;
+        firebaseCrashlytics = null;
     }
 
     public static FirebaseAnalytics getFirebaseAnalytics() {

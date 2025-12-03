@@ -137,8 +137,34 @@ public class LiquidGlassEffect {
 
             Bitmap region = Bitmap.createBitmap(source, left, top, width, height);
 
-            // Apply blur
-            Bitmap blurred = applyBlur(region, parameters.blurRadius);
+            // Downscale before blurring for smoother, faster blur; scale based on radius
+            float scale = 1.0f;
+            if (parameters.blurRadius >= 18f) {
+                scale = 0.35f;
+            } else if (parameters.blurRadius >= 12f) {
+                scale = 0.5f;
+            } else if (parameters.blurRadius >= 8f) {
+                scale = 0.7f;
+            }
+
+            Bitmap working = region;
+            if (scale < 1f) {
+                int scaledW = Math.max(1, Math.round(region.getWidth() * scale));
+                int scaledH = Math.max(1, Math.round(region.getHeight() * scale));
+                working = Bitmap.createScaledBitmap(region, scaledW, scaledH, true);
+            }
+
+            // Apply blur on scaled bitmap
+            Bitmap blurred = applyBlur(working, parameters.blurRadius * scale);
+
+            // If we downscaled, upscale back to original region size for drawing
+            if (blurred != null && scale < 1f) {
+                Bitmap scaledUp = Bitmap.createScaledBitmap(blurred, region.getWidth(), region.getHeight(), true);
+                if (blurred != working && blurred != region) {
+                    blurred.recycle();
+                }
+                blurred = scaledUp;
+            }
 
             // Cache result
             if (cachedBlurredBitmap != null && !cachedBlurredBitmap.isRecycled()) {
@@ -150,6 +176,9 @@ public class LiquidGlassEffect {
             // Clean up temporary bitmap
             if (region != blurred) {
                 region.recycle();
+            }
+            if (working != region && working != blurred) {
+                working.recycle();
             }
 
             return blurred;
@@ -166,12 +195,12 @@ public class LiquidGlassEffect {
             return bitmap;
         }
 
+        int blurRadius = (int) Math.min(25, radius);
         try {
-            // Use Telegram's optimized blur implementation
-            int blurRadius = (int) Math.min(25, radius);
-            Utilities.blurBitmap(bitmap, blurRadius, 1, bitmap.getWidth(), bitmap.getHeight(), bitmap.getRowBytes());
-            return bitmap;
-        } catch (Exception e) {
+            // Use Telegram's stack blur which returns the source bitmap
+            return Utilities.stackBlurBitmap(bitmap, blurRadius, false);
+        } catch (Throwable ignore) {
+            // Fallback to original bitmap on failure
             return bitmap;
         }
     }

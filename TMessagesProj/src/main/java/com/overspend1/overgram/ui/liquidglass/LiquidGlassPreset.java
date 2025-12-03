@@ -13,12 +13,12 @@ package com.overspend1.overgram.ui.liquidglass;
  * Predefined liquid glass presets
  */
 public enum LiquidGlassPreset {
-    SUBTLE(0, "Subtle", 8f, 0.90f),
-    STANDARD(1, "Standard", 15f, 0.75f),
-    HEAVY(2, "Heavy", 20f, 0.60f),
-    FROSTED(3, "Frosted", 25f, 0.55f),
-    CRYSTAL(4, "Crystal", 12f, 0.80f),
-    MIDNIGHT(5, "Midnight", 18f, 0.65f);
+    SUBTLE(0, "Subtle", 6f, 0.92f),
+    STANDARD(1, "Standard", 10f, 0.80f),
+    HEAVY(2, "Heavy", 16f, 0.65f),
+    FROSTED(3, "Frosted", 20f, 0.60f),
+    CRYSTAL(4, "Crystal", 12f, 0.85f),
+    MIDNIGHT(5, "Midnight", 16f, 0.70f);
 
     public final int id;
     public final String name;

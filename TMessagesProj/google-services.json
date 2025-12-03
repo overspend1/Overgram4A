@@ -1,13 +1,13 @@
 {
   "project_info": {
-    "project_number": "000000000000",
-    "project_id": "overgram-placeholder",
-    "storage_bucket": "overgram-placeholder.appspot.com"
+    "project_number": "593914352814",
+    "project_id": "overgram-5e84a",
+    "storage_bucket": "overgram-5e84a.firebasestorage.app"
   },
   "client": [
     {
       "client_info": {
-        "mobilesdk_app_id": "1:000000000000:android:placeholder",
+        "mobilesdk_app_id": "1:593914352814:android:a15b5adcbfe8a5115e493f",
         "android_client_info": {
           "package_name": "com.overspend1.overgram"
         }
@@ -15,7 +15,7 @@
       "oauth_client": [],
       "api_key": [
         {
-          "current_key": "AIzaSyPlaceholder"
+          "current_key": "AIzaSyCjCOoI0cmlEm19CR2Yl0bvyN9G1wh9bs4"
         }
       ],
       "services": {
