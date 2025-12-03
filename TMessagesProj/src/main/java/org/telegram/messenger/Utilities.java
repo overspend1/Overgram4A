@@ -82,6 +82,15 @@ public class Utilities {
     public static native void generateGradient(Bitmap bitmap, boolean unpin, int phase, float progress, int width, int height, int stride, int[] colors);
     public static native void setupNativeCrashesListener(String path);
 
+    public static Bitmap stackBlurBitmap(Bitmap bitmap, int radius, boolean copy) {
+        if (bitmap == null) {
+            return null;
+        }
+        Bitmap target = copy ? bitmap.copy(bitmap.getConfig() != null ? bitmap.getConfig() : Bitmap.Config.ARGB_8888, true) : bitmap;
+        stackBlurBitmap(target, radius);
+        return target;
+    }
+
     public static Bitmap stackBlurBitmapMax(Bitmap bitmap) {
         int w = AndroidUtilities.dp(20);
         int h = (int) (AndroidUtilities.dp(20) * (float) bitmap.getHeight() / bitmap.getWidth());

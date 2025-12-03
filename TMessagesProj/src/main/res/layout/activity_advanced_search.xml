@@ -1,0 +1,155 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:padding="16dp">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical">
+
+        <com.google.android.material.textfield.TextInputLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content">
+
+            <com.google.android.material.textfield.TextInputEditText
+                android:id="@+id/search_query_input"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:hint="Search query" />
+        </com.google.android.material.textfield.TextInputLayout>
+
+        <CheckBox
+            android:id="@+id/search_regex_checkbox"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Use regex" />
+
+        <CheckBox
+            android:id="@+id/search_case_sensitive_checkbox"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Case sensitive" />
+
+        <Spinner
+            android:id="@+id/search_media_type_spinner"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content" />
+
+        <Spinner
+            android:id="@+id/search_message_type_spinner"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content" />
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal">
+
+            <Button
+                android:id="@+id/search_date_from_button"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="Date from" />
+
+            <Button
+                android:id="@+id/search_date_to_button"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="Date to" />
+        </LinearLayout>
+
+        <CheckBox
+            android:id="@+id/filter_only_edited"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Only edited" />
+
+        <CheckBox
+            android:id="@+id/filter_only_forwarded"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Only forwarded" />
+
+        <CheckBox
+            android:id="@+id/filter_only_replies"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Only replies" />
+
+        <CheckBox
+            android:id="@+id/filter_has_links"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Has links" />
+
+        <CheckBox
+            android:id="@+id/filter_has_hashtags"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Has hashtags" />
+
+        <CheckBox
+            android:id="@+id/filter_has_mentions"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Has mentions" />
+
+        <com.google.android.material.chip.ChipGroup
+            android:id="@+id/search_active_filters"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content" />
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal">
+
+            <Button
+                android:id="@+id/btn_search"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="Search" />
+
+            <Button
+                android:id="@+id/btn_clear_filters"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="Clear" />
+        </LinearLayout>
+    </LinearLayout>
+
+    <com.google.android.material.progressindicator.LinearProgressIndicator
+        android:id="@+id/search_progress"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:visibility="gone" />
+
+    <TextView
+        android:id="@+id/search_result_count"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Results: 0" />
+
+    <TextView
+        android:id="@+id/search_empty_view"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="No results"
+        android:visibility="gone"
+        android:gravity="center"
+        android:padding="12dp" />
+
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/search_results_recycler"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1" />
+
+</LinearLayout>

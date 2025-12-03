@@ -14,6 +14,7 @@ import com.google.android.material.chip.Chip
 import com.google.android.material.chip.ChipGroup
 import com.google.android.material.progressindicator.LinearProgressIndicator
 import com.google.android.material.textfield.TextInputEditText
+import org.telegram.messenger.R
 import kotlinx.coroutines.launch
 import java.text.SimpleDateFormat
 import java.util.*

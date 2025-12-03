@@ -5692,6 +5692,10 @@ public class MessageObject {
         return messageOwner.out;
     }
 
+    public boolean isService() {
+        return messageOwner != null && messageOwner.action != null;
+    }
+
     public Boolean isOutOwnerCached;
     public boolean isOutOwner() {
         if (preview) {

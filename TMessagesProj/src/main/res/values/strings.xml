@@ -6655,4 +6655,9 @@
     <string name="BotWebAppInstantViewOpen">Open App</string>
     <string name="RestorePremiumHintTitle">Get Premium back with up to **%1$d%%** off</string>
     <string name="RestorePremiumHintMessage">Your Telegram Premium has recently expired. Tap here to extend it.</string>
+    <string name="YagizTranslatorHeader">Yagiz Translator</string>
+    <string name="YagizTranslatorEnabled">Yagiz Translator enabled</string>
+    <string name="YagizTranslatorPerChat">Enable Yagiz Translator for this chat</string>
+    <string name="YagizTranslatorApiType">Yagiz Translator API</string>
+    <string name="YagizTranslatorAutoDetect">Auto-detect Turkish ↔ English</string>
 </resources>

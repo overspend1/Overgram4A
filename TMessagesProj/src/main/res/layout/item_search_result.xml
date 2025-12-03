@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="vertical"
+    android:padding="12dp">
+
+    <TextView
+        android:id="@+id/result_message_text"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:textStyle="bold"
+        android:text="Message preview" />
+
+    <TextView
+        android:id="@+id/result_chat_name"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Chat name" />
+
+    <TextView
+        android:id="@+id/result_date"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Date" />
+
+    <View
+        android:id="@+id/result_score_indicator"
+        android:layout_width="match_parent"
+        android:layout_height="2dp"
+        android:background="#FF6200EE" />
+
+</LinearLayout>

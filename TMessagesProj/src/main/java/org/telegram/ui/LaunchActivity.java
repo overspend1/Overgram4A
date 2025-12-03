@@ -5889,10 +5889,10 @@ public class LaunchActivity extends BasePermissionsActivity implements INavigati
             float radius = Math.max(6f, OverConfig.liquidGlassBlurRadius * 1.2f);
             effect = RenderEffect.createBlurEffect(radius, radius, TileMode.CLAMP);
         }
-        setRenderEffectSafe(actionBarLayout, effect);
+        setRenderEffectSafe(actionBarLayout != null ? actionBarLayout.getView() : null, effect);
         if (AndroidUtilities.isTablet()) {
-            setRenderEffectSafe(rightActionBarLayout, effect);
-            setRenderEffectSafe(layersActionBarLayout, effect);
+            setRenderEffectSafe(rightActionBarLayout != null ? rightActionBarLayout.getView() : null, effect);
+            setRenderEffectSafe(layersActionBarLayout != null ? layersActionBarLayout.getView() : null, effect);
         }
     }
 

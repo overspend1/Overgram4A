@@ -17,6 +17,7 @@ object LiquidGlassHelper {
      * Apply window-level blur (Android 12+)
      */
     @RequiresApi(Build.VERSION_CODES.S)
+    @JvmStatic
     fun applyWindowBlur(window: Window, blurRadius: Int = 20) {
         if (!OvergramConfig.liquidGlassEnabled || !OvergramConfig.liquidGlassUseNativeEffects) {
             return
@@ -34,6 +35,7 @@ object LiquidGlassHelper {
      * Remove window-level blur
      */
     @RequiresApi(Build.VERSION_CODES.S)
+    @JvmStatic
     fun removeWindowBlur(window: Window) {
         try {
             window.setBackgroundBlurRadius(0)

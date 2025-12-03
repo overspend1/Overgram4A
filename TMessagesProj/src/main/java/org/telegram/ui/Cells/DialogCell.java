@@ -13,6 +13,7 @@ import android.animation.AnimatorListenerAdapter;
 import android.animation.ValueAnimator;
 import android.annotation.SuppressLint;
 import android.content.Context;
+import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.LinearGradient;
@@ -41,6 +42,7 @@ import android.text.style.ReplacementSpan;
 import android.text.style.StyleSpan;
 import android.view.HapticFeedbackConstants;
 import android.view.MotionEvent;
+import android.view.View;
 import android.view.accessibility.AccessibilityEvent;
 import android.view.accessibility.AccessibilityNodeInfo;
 import android.view.animation.Interpolator;
@@ -182,12 +184,6 @@ public class DialogCell extends BaseCell {
 
     public boolean isMoving() {
         return moving;
-    }
-
-    @Override
-    protected void onDetachedFromWindow() {
-        super.onDetachedFromWindow();
-        clearGlassResources();
     }
 
     private boolean shouldUseLiquidGlass() {
@@ -781,6 +777,7 @@ public class DialogCell extends BaseCell {
         AnimatedEmojiSpan.release(this, animatedEmojiStack2);
         AnimatedEmojiSpan.release(this, animatedEmojiStack3);
         AnimatedEmojiSpan.release(this, animatedEmojiStackName);
+        clearGlassResources();
     }
 
     @Override

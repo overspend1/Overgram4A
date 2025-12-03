@@ -164,7 +164,7 @@ class LiquidGlassSettingsActivity : BaseFragment() {
         // Reset button
         val resetButton = TextView(context).apply {
             text = "Reset to Defaults"
-            setTextColor(Theme.getColor(Theme.key_windowBackgroundWhiteRedText))
+            setTextColor(Theme.getColor(Theme.key_windowBackgroundWhiteBlueText))
             gravity = Gravity.CENTER
             setPadding(AndroidUtilities.dp(16f), AndroidUtilities.dp(16f), AndroidUtilities.dp(16f), AndroidUtilities.dp(16f))
             setOnClickListener {
