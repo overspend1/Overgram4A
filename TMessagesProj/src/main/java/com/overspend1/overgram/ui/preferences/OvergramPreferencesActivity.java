@@ -25,6 +25,7 @@ import com.overspend1.overgram.ui.preferences.utils.OverUi;
 import com.overspend1.overgram.utils.OverState;
 import org.jetbrains.annotations.NotNull;
 import org.telegram.messenger.*;
+import org.telegram.ui.ActionBar.AlertDialog;
 import org.telegram.ui.ActionBar.Theme;
 import org.telegram.ui.Cells.*;
 import org.telegram.ui.Components.BulletinFactory;
@@ -58,6 +59,7 @@ public class OvergramPreferencesActivity extends BasePreferencesActivity impleme
     private int disableAdsRow;
     private int localPremiumRow;
     private int filtersRow;
+    private int quickActionsRow;
     private int qolDividerRow;
 
     private int customizationHeaderRow;
@@ -74,6 +76,20 @@ public class OvergramPreferencesActivity extends BasePreferencesActivity impleme
     private int aiHeaderRow;
     private int aiSettingsRow;
     private int aiDividerRow;
+
+    private int productivityHeaderRow;
+    private int smartRepliesRow;
+    private int autoTranslateIncomingRow;
+    private int autoTranslateOutgoingRow;
+    private int autoTranslateLangRow;
+    private int autoTranslateIncomingLangRow;
+    private int productivityDividerRow;
+
+    private int yagizTranslatorHeaderRow;
+    private int yagizTranslatorEnabledRow;
+    private int yagizTranslatorApiTypeRow;
+    private int yagizTranslatorAutoDetectRow;
+    private int yagizTranslatorDividerRow;
 
     private int ayuSyncHeaderRow;
     private int ayuSyncStatusBtnRow;
@@ -120,6 +136,7 @@ public class OvergramPreferencesActivity extends BasePreferencesActivity impleme
         disableAdsRow = newRow();
         localPremiumRow = newRow();
         filtersRow = newRow();
+        quickActionsRow = newRow();
         qolDividerRow = newRow();
 
         customizationHeaderRow = newRow();
@@ -136,6 +153,20 @@ public class OvergramPreferencesActivity extends BasePreferencesActivity impleme
         aiHeaderRow = newRow();
         aiSettingsRow = newRow();
         aiDividerRow = newRow();
+
+        productivityHeaderRow = newRow();
+        smartRepliesRow = newRow();
+        autoTranslateIncomingRow = newRow();
+        autoTranslateOutgoingRow = newRow();
+        autoTranslateLangRow = newRow();
+        autoTranslateIncomingLangRow = newRow();
+        productivityDividerRow = newRow();
+
+        yagizTranslatorHeaderRow = newRow();
+        yagizTranslatorEnabledRow = newRow();
+        yagizTranslatorApiTypeRow = newRow();
+        yagizTranslatorAutoDetectRow = newRow();
+        yagizTranslatorDividerRow = newRow();
 
         ayuSyncHeaderRow = newRow();
         ayuSyncStatusBtnRow = newRow();
@@ -285,6 +316,8 @@ public class OvergramPreferencesActivity extends BasePreferencesActivity impleme
             } else {
                 presentFragment(new RegexFiltersPreferencesActivity());
             }
+        } else if (position == quickActionsRow) {
+            showQuickActions();
         } else if (position == showGhostToggleInDrawerRow) {
             OverConfig.editor.putBoolean("showGhostToggleInDrawer", OverConfig.showGhostToggleInDrawer ^= true).apply();
             ((TextCheckCell) view).setChecked(OverConfig.showGhostToggleInDrawer);
@@ -317,6 +350,27 @@ public class OvergramPreferencesActivity extends BasePreferencesActivity impleme
             presentFragment(new LiquidGlassPreferencesActivity());
         } else if (position == aiSettingsRow) {
             presentFragment(new AiPreferencesActivity());
+        } else if (position == smartRepliesRow) {
+            OverConfig.editor.putBoolean("smartQuickReplies", OverConfig.smartQuickReplies ^= true).apply();
+            ((TextCheckCell) view).setChecked(OverConfig.smartQuickReplies);
+        } else if (position == autoTranslateIncomingRow) {
+            OverConfig.editor.putBoolean("autoTranslateIncomingDefault", OverConfig.autoTranslateIncomingDefault ^= true).apply();
+            ((TextCheckCell) view).setChecked(OverConfig.autoTranslateIncomingDefault);
+        } else if (position == autoTranslateOutgoingRow) {
+            OverConfig.editor.putBoolean("autoTranslateOutgoingDefault", OverConfig.autoTranslateOutgoingDefault ^= true).apply();
+            ((TextCheckCell) view).setChecked(OverConfig.autoTranslateOutgoingDefault);
+        } else if (position == autoTranslateLangRow) {
+            showLanguagePicker(false); // false = outgoing language
+        } else if (position == autoTranslateIncomingLangRow) {
+            showLanguagePicker(true); // true = incoming language
+        } else if (position == yagizTranslatorEnabledRow) {
+            OverConfig.editor.putBoolean("yagizTranslatorEnabled", OverConfig.yagizTranslatorEnabled ^= true).apply();
+            ((TextCheckCell) view).setChecked(OverConfig.yagizTranslatorEnabled);
+        } else if (position == yagizTranslatorApiTypeRow) {
+            showYagizTranslatorApiPicker();
+        } else if (position == yagizTranslatorAutoDetectRow) {
+            OverConfig.editor.putBoolean("yagizTranslatorAutoDetect", OverConfig.yagizTranslatorAutoDetect ^= true).apply();
+            ((TextCheckCell) view).setChecked(OverConfig.yagizTranslatorAutoDetect);
         } else if (position == ayuSyncStatusBtnRow) {
             presentFragment(new OverSyncPreferencesActivity());
         } else if (position == WALModeRow) {
@@ -391,6 +445,10 @@ public class OvergramPreferencesActivity extends BasePreferencesActivity impleme
                         textCell.setTextAndValue(LocaleController.getString(R.string.DeletedMarkText), OverConfig.getDeletedMark(), true);
                     } else if (position == editedMarkTextRow) {
                         textCell.setTextAndValue(LocaleController.getString(R.string.EditedMarkText), OverConfig.getEditedMark(), true);
+                    } else if (position == quickActionsRow) {
+                        textCell.setTextAndValue(LocaleController.getString(R.string.OvergramQuickActions),
+                                LocaleController.getString(R.string.OvergramQuickActionsHint),
+                                true);
                     } else if (position == liquidGlassBtnRow) {
                         textCell.setTextAndValue(LocaleController.getString(R.string.LiquidGlassHeader),
                             OverConfig.liquidGlassEnabled ? LocaleController.getString("NotificationsOn", R.string.NotificationsOn) : LocaleController.getString("NotificationsOff", R.string.NotificationsOff),
@@ -399,6 +457,17 @@ public class OvergramPreferencesActivity extends BasePreferencesActivity impleme
                         textCell.setTextAndValue(LocaleController.getString(R.string.OvergramAiSettings),
                                 OverConfig.geminiEnabled ? LocaleController.getString("NotificationsOn", R.string.NotificationsOn) : LocaleController.getString("NotificationsOff", R.string.NotificationsOff),
                                 true);
+                    } else if (position == autoTranslateLangRow) {
+                        String langCode = OverConfig.autoTranslateOutgoingLangDefault;
+                        String langName = getLanguageDisplayName(langCode);
+                        textCell.setTextAndValue(LocaleController.getString(R.string.AutoTranslateOutgoingLang), langName, true);
+                    } else if (position == autoTranslateIncomingLangRow) {
+                        String langCode = OverConfig.autoTranslateIncomingLangDefault;
+                        String langName = getLanguageDisplayName(langCode);
+                        textCell.setTextAndValue(LocaleController.getString(R.string.AutoTranslateIncomingLang), langName, true);
+                    } else if (position == yagizTranslatorApiTypeRow) {
+                        String apiName = com.overspend1.overgram.translator.YagizTranslator.getApiName(OverConfig.yagizTranslatorApiType);
+                        textCell.setTextAndValue(LocaleController.getString(R.string.YagizTranslatorApiType), apiName, true);
                     } else if (position == ayuSyncStatusBtnRow) {
                         var status = OverSyncState.getConnectionStateString();
 
@@ -428,6 +497,10 @@ public class OvergramPreferencesActivity extends BasePreferencesActivity impleme
                         headerCell.setText(LocaleController.getString(R.string.LiquidGlassHeader));
                     } else if (position == aiHeaderRow) {
                         headerCell.setText(LocaleController.getString(R.string.OvergramAiHeader));
+                    } else if (position == productivityHeaderRow) {
+                        headerCell.setText(LocaleController.getString(R.string.ProductivityHeader));
+                    } else if (position == yagizTranslatorHeaderRow) {
+                        headerCell.setText(LocaleController.getString(R.string.YagizTranslatorHeader));
                     } else if (position == ayuSyncHeaderRow) {
                         headerCell.setText(LocaleController.getString(R.string.AyuSyncHeader));
                     } else if (position == debugHeaderRow) {
@@ -457,6 +530,16 @@ public class OvergramPreferencesActivity extends BasePreferencesActivity impleme
                         textCheckCell.setTextAndCheck(LocaleController.getString(R.string.ShowKllButtonInDrawer), OverConfig.showKillButtonInDrawer, false);
                     } else if (position == WALModeRow) {
                         textCheckCell.setTextAndCheck(LocaleController.getString(R.string.WALMode), OverConfig.WALMode, false);
+                    } else if (position == smartRepliesRow) {
+                        textCheckCell.setTextAndCheck(LocaleController.getString(R.string.SmartQuickReplies), OverConfig.smartQuickReplies, true);
+                    } else if (position == autoTranslateIncomingRow) {
+                        textCheckCell.setTextAndCheck(LocaleController.getString(R.string.AutoTranslateIncoming), OverConfig.autoTranslateIncomingDefault, true);
+                    } else if (position == autoTranslateOutgoingRow) {
+                        textCheckCell.setTextAndCheck(LocaleController.getString(R.string.AutoTranslateOutgoing), OverConfig.autoTranslateOutgoingDefault, true);
+                    } else if (position == yagizTranslatorEnabledRow) {
+                        textCheckCell.setTextAndCheck(LocaleController.getString(R.string.YagizTranslatorEnabled), OverConfig.yagizTranslatorEnabled, true);
+                    } else if (position == yagizTranslatorAutoDetectRow) {
+                        textCheckCell.setTextAndCheck(LocaleController.getString(R.string.YagizTranslatorAutoDetect), OverConfig.yagizTranslatorAutoDetect, false);
                     }
                     break;
                 case 18:
@@ -517,16 +600,22 @@ public class OvergramPreferencesActivity extends BasePreferencesActivity impleme
                     position == customizationDividerRow ||
                     position == liquidGlassDividerRow ||
                     position == aiDividerRow ||
+                    position == productivityDividerRow ||
+                    position == yagizTranslatorDividerRow ||
                     position == ayuSyncDividerRow ||
                     position == buttonsDividerRow
             ) {
                 return 1;
             } else if (
-                    position == messageSavingBtnRow ||
+                            position == messageSavingBtnRow ||
                             position == deletedMarkTextRow ||
                             position == editedMarkTextRow ||
+                            position == quickActionsRow ||
                             position == liquidGlassBtnRow ||
                             position == aiSettingsRow ||
+                            position == autoTranslateLangRow ||
+                            position == autoTranslateIncomingLangRow ||
+                            position == yagizTranslatorApiTypeRow ||
                             position == ayuSyncStatusBtnRow ||
                             position == clearAyuDatabaseBtnRow ||
                             position == eraseLocalDatabaseBtnRow
@@ -539,6 +628,8 @@ public class OvergramPreferencesActivity extends BasePreferencesActivity impleme
                             position == customizationHeaderRow ||
                             position == liquidGlassHeaderRow ||
                             position == aiHeaderRow ||
+                            position == productivityHeaderRow ||
+                            position == yagizTranslatorHeaderRow ||
                             position == ayuSyncHeaderRow ||
                             position == debugHeaderRow
             ) {
@@ -555,8 +646,168 @@ public class OvergramPreferencesActivity extends BasePreferencesActivity impleme
                     position == filtersRow
             ) {
                 return TOGGLE_BUTTON_VIEW;
+            } else if (
+                    position == smartRepliesRow ||
+                    position == autoTranslateIncomingRow ||
+                    position == autoTranslateOutgoingRow ||
+                    position == yagizTranslatorEnabledRow ||
+                    position == yagizTranslatorAutoDetectRow
+            ) {
+                return 5;
             }
             return 5;
         }
+    }
+
+    private void showQuickActions() {
+        if (getParentActivity() == null) {
+            return;
+        }
+        String[] options = new String[] {
+                LocaleController.getString(R.string.OvergramQuickActionToggleGlass),
+                LocaleController.getString(R.string.OvergramQuickActionToggleGhost),
+                LocaleController.getString(R.string.OvergramQuickActionOpenGlass),
+                LocaleController.getString(R.string.OvergramQuickActionOpenAi)
+        };
+
+        AlertDialog.Builder builder = new AlertDialog.Builder(getParentActivity());
+        builder.setTitle(LocaleController.getString(R.string.OvergramQuickActions));
+        builder.setItems(options, (dialog, which) -> {
+            switch (which) {
+                case 0: {
+                    OverConfig.liquidGlassEnabled = !OverConfig.liquidGlassEnabled;
+                    OverConfig.editor.putBoolean("liquidGlassEnabled", OverConfig.liquidGlassEnabled).apply();
+                    listAdapter.notifyItemChanged(liquidGlassBtnRow, payload);
+                    BulletinFactory.of(this).createSimpleBulletin(
+                            OverConfig.liquidGlassEnabled ? R.raw.done : R.raw.deactivate,
+                            OverConfig.liquidGlassEnabled ? LocaleController.getString("NotificationsOn", R.string.NotificationsOn) : LocaleController.getString("NotificationsOff", R.string.NotificationsOff)
+                    ).show();
+                    break;
+                }
+                case 1: {
+                    OverConfig.toggleGhostMode();
+                    updateGhostViews();
+                    BulletinFactory.of(this).createSimpleBulletin(
+                            OverConfig.isGhostModeActive() ? R.raw.done : R.raw.deactivate,
+                            OverConfig.isGhostModeActive() ? LocaleController.getString(R.string.GhostModeEnabled) : LocaleController.getString(R.string.GhostModeDisabled)
+                    ).show();
+                    break;
+                }
+                case 2:
+                    presentFragment(new LiquidGlassPreferencesActivity());
+                    break;
+                case 3:
+                    presentFragment(new AiPreferencesActivity());
+                    break;
+                default:
+                    break;
+            }
+        });
+        builder.setNegativeButton(LocaleController.getString("Cancel", R.string.Cancel), null);
+        showDialog(builder.create());
+    }
+
+    private String getLanguageDisplayName(String langCode) {
+        if (langCode == null || langCode.isEmpty()) {
+            langCode = "en";
+        }
+
+        // Common language names
+        switch (langCode.toLowerCase()) {
+            case "en": return "English";
+            case "es": return "Spanish";
+            case "fr": return "French";
+            case "de": return "German";
+            case "it": return "Italian";
+            case "pt": return "Portuguese";
+            case "ru": return "Russian";
+            case "ja": return "Japanese";
+            case "ko": return "Korean";
+            case "zh": return "Chinese";
+            case "ar": return "Arabic";
+            case "hi": return "Hindi";
+            case "tr": return "Turkish";
+            case "pl": return "Polish";
+            case "uk": return "Ukrainian";
+            case "nl": return "Dutch";
+            case "sv": return "Swedish";
+            case "no": return "Norwegian";
+            case "da": return "Danish";
+            case "fi": return "Finnish";
+            default: return langCode.toUpperCase();
+        }
+    }
+
+    private void showLanguagePicker(boolean isIncoming) {
+        if (getParentActivity() == null) {
+            return;
+        }
+
+        String[][] languages = {
+            {"en", "English"},
+            {"es", "Spanish"},
+            {"fr", "French"},
+            {"de", "German"},
+            {"it", "Italian"},
+            {"pt", "Portuguese"},
+            {"ru", "Russian"},
+            {"ja", "Japanese"},
+            {"ko", "Korean"},
+            {"zh", "Chinese"},
+            {"ar", "Arabic"},
+            {"hi", "Hindi"},
+            {"tr", "Turkish"},
+            {"pl", "Polish"},
+            {"uk", "Ukrainian"},
+            {"nl", "Dutch"},
+            {"sv", "Swedish"},
+            {"no", "Norwegian"},
+            {"da", "Danish"},
+            {"fi", "Finnish"}
+        };
+
+        String[] options = new String[languages.length];
+        for (int i = 0; i < languages.length; i++) {
+            options[i] = languages[i][1];
+        }
+
+        AlertDialog.Builder builder = new AlertDialog.Builder(getParentActivity());
+        builder.setTitle(LocaleController.getString(isIncoming ? R.string.AutoTranslateIncomingLang : R.string.AutoTranslateOutgoingLang));
+        builder.setItems(options, (dialog, which) -> {
+            String selectedLang = languages[which][0];
+            if (isIncoming) {
+                OverConfig.autoTranslateIncomingLangDefault = selectedLang;
+                OverConfig.editor.putString("autoTranslateIncomingLangDefault", selectedLang).apply();
+                listAdapter.notifyItemChanged(autoTranslateIncomingLangRow);
+            } else {
+                OverConfig.autoTranslateOutgoingLangDefault = selectedLang;
+                OverConfig.editor.putString("autoTranslateOutgoingLangDefault", selectedLang).apply();
+                listAdapter.notifyItemChanged(autoTranslateLangRow);
+            }
+        });
+        builder.setNegativeButton(LocaleController.getString("Cancel", R.string.Cancel), null);
+        showDialog(builder.create());
+    }
+
+    private void showYagizTranslatorApiPicker() {
+        if (getParentActivity() == null) {
+            return;
+        }
+
+        String[] apiNames = {
+            com.overspend1.overgram.translator.YagizTranslator.getApiName(com.overspend1.overgram.translator.YagizTranslator.API_GEMINI),
+            com.overspend1.overgram.translator.YagizTranslator.getApiName(com.overspend1.overgram.translator.YagizTranslator.API_GOOGLE),
+            com.overspend1.overgram.translator.YagizTranslator.getApiName(com.overspend1.overgram.translator.YagizTranslator.API_DEEPL)
+        };
+
+        AlertDialog.Builder builder = new AlertDialog.Builder(getParentActivity());
+        builder.setTitle(LocaleController.getString(R.string.YagizTranslatorApiType));
+        builder.setItems(apiNames, (dialog, which) -> {
+            OverConfig.yagizTranslatorApiType = which;
+            OverConfig.editor.putInt("yagizTranslatorApiType", which).apply();
+            listAdapter.notifyItemChanged(yagizTranslatorApiTypeRow);
+        });
+        builder.setNegativeButton(LocaleController.getString("Cancel", R.string.Cancel), null);
+        showDialog(builder.create());
     }
 }

@@ -10,13 +10,25 @@
 package com.overspend1.overgram.ui.preferences;
 
 import android.content.Context;
+import android.graphics.Bitmap;
+import android.graphics.Canvas;
+import android.graphics.LinearGradient;
+import android.graphics.Paint;
+import android.graphics.RectF;
+import android.graphics.Shader;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.LinearLayout;
+import android.widget.SeekBar;
+import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 import com.exteragram.messenger.preferences.BasePreferencesActivity;
 import com.overspend1.overgram.OverConfig;
+import com.overspend1.overgram.ui.liquidglass.GlassParameters;
 import com.overspend1.overgram.ui.liquidglass.LiquidGlassPreset;
+import com.overspend1.overgram.ui.liquidglass.LiquidGlassEffect;
+import org.telegram.messenger.AndroidUtilities;
 import org.telegram.messenger.LocaleController;
 import org.telegram.messenger.R;
 import org.telegram.ui.ActionBar.AlertDialog;
@@ -32,6 +44,7 @@ public class LiquidGlassPreferencesActivity extends BasePreferencesActivity {
 
     private int applyToChatBubblesRow;
     private int applyToDialogsRow;
+    private int applyToSystemRow;
     private int divider2Row;
 
     private int presetRow;
@@ -54,6 +67,7 @@ public class LiquidGlassPreferencesActivity extends BasePreferencesActivity {
         if (OverConfig.liquidGlassEnabled) {
             applyToChatBubblesRow = newRow();
             applyToDialogsRow = newRow();
+            applyToSystemRow = newRow();
             divider2Row = newRow();
 
             presetRow = newRow();
@@ -66,6 +80,7 @@ public class LiquidGlassPreferencesActivity extends BasePreferencesActivity {
         } else {
             applyToChatBubblesRow = -1;
             applyToDialogsRow = -1;
+            applyToSystemRow = -1;
             divider2Row = -1;
             presetRow = -1;
             blurRadiusRow = -1;
@@ -84,11 +99,7 @@ public class LiquidGlassPreferencesActivity extends BasePreferencesActivity {
             ((TextCheckCell) view).setChecked(OverConfig.liquidGlassEnabled);
 
             updateRowsId();
-            if (OverConfig.liquidGlassEnabled) {
-                listAdapter.notifyItemRangeInserted(divider1Row + 1, 11);
-            } else {
-                listAdapter.notifyItemRangeRemoved(divider1Row + 1, 11);
-            }
+            listAdapter.notifyDataSetChanged();
         } else if (position == applyToChatBubblesRow) {
             OverConfig.liquidGlassApplyToChatBubbles ^= true;
             OverConfig.editor.putBoolean("liquidGlassApplyToChatBubbles", OverConfig.liquidGlassApplyToChatBubbles).apply();
@@ -97,6 +108,10 @@ public class LiquidGlassPreferencesActivity extends BasePreferencesActivity {
             OverConfig.liquidGlassApplyToDialogs ^= true;
             OverConfig.editor.putBoolean("liquidGlassApplyToDialogs", OverConfig.liquidGlassApplyToDialogs).apply();
             ((TextCheckCell) view).setChecked(OverConfig.liquidGlassApplyToDialogs);
+        } else if (position == applyToSystemRow) {
+            OverConfig.liquidGlassApplyToSystemSurfaces ^= true;
+            OverConfig.editor.putBoolean("liquidGlassApplyToSystemSurfaces", OverConfig.liquidGlassApplyToSystemSurfaces).apply();
+            ((TextCheckCell) view).setChecked(OverConfig.liquidGlassApplyToSystemSurfaces);
         } else if (position == presetRow) {
             showPresetSelector();
         } else if (position == blurRadiusRow) {
@@ -120,6 +135,15 @@ public class LiquidGlassPreferencesActivity extends BasePreferencesActivity {
                 }
             );
         }
+    }
+
+    private GlassParameters buildGlassParameters() {
+        LiquidGlassPreset preset = LiquidGlassPreset.fromId(OverConfig.liquidGlassPreset);
+        GlassParameters params = preset.toParameters();
+        params.blurRadius = OverConfig.liquidGlassBlurRadius;
+        params.opacity = OverConfig.liquidGlassOpacity;
+        params.clamp();
+        return params;
     }
 
     private void showPresetSelector() {
@@ -149,12 +173,68 @@ public class LiquidGlassPreferencesActivity extends BasePreferencesActivity {
     }
 
     private void showSlider(String title, int min, int max, int current, SliderCallback callback) {
-        AlertDialog.Builder builder = new AlertDialog.Builder(getParentActivity());
+        Context context = getParentActivity();
+        if (context == null) {
+            return;
+        }
+
+        int initial = current;
+
+        AlertDialog.Builder builder = new AlertDialog.Builder(context);
         builder.setTitle(title);
 
-        // Simple implementation - can be enhanced with actual slider view
-        builder.setMessage("Current value: " + current + "\nUse custom slider implementation here");
+        LinearLayout container = new LinearLayout(context);
+        container.setOrientation(LinearLayout.VERTICAL);
+        int pad = AndroidUtilities.dp(20);
+        container.setPadding(pad, pad, pad, pad);
+
+        TextView valueView = new TextView(context);
+        valueView.setTextColor(Theme.getColor(Theme.key_dialogTextBlack));
+        valueView.setTextSize(16);
+        valueView.setText(String.valueOf(current));
+        container.addView(valueView, new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT));
+
+        SeekBar seekBar = new SeekBar(context);
+        seekBar.setMax(max - min);
+        seekBar.setProgress(current - min);
+        container.addView(seekBar, new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT));
+
+        // Glass preview
+        GlassPreviewView previewView = new GlassPreviewView(context);
+        previewView.setLayoutParams(new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, AndroidUtilities.dp(120)));
+        previewView.setEffect(new LiquidGlassEffect(buildGlassParameters()));
+        container.addView(previewView);
+
+        seekBar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
+            @Override
+            public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
+                float value = min + progress;
+                valueView.setText(String.valueOf((int) value));
+                callback.onValueChanged(value);
+                // Refresh preview using current config
+                if (previewView.getEffect() != null) {
+                    previewView.getEffect().setParameters(buildGlassParameters());
+                    previewView.invalidate();
+                }
+            }
+
+            @Override
+            public void onStartTrackingTouch(SeekBar seekBar) { }
+
+            @Override
+            public void onStopTrackingTouch(SeekBar seekBar) { }
+        });
+
+        builder.setView(container);
         builder.setPositiveButton(LocaleController.getString("OK", R.string.OK), null);
+        builder.setNegativeButton(LocaleController.getString("Cancel", R.string.Cancel), (dialog, which) -> {
+            // revert if cancelled
+            callback.onValueChanged(initial);
+            if (previewView.getEffect() != null) {
+                previewView.getEffect().setParameters(buildGlassParameters());
+                previewView.invalidate();
+            }
+        });
         showDialog(builder.create());
     }
 
@@ -243,6 +323,12 @@ public class LiquidGlassPreferencesActivity extends BasePreferencesActivity {
                             OverConfig.liquidGlassApplyToDialogs,
                             false
                         );
+                    } else if (position == applyToSystemRow) {
+                        textCheckCell.setTextAndCheck(
+                            LocaleController.getString(R.string.LiquidGlassApplyToSystem),
+                            OverConfig.liquidGlassApplyToSystemSurfaces,
+                            false
+                        );
                     }
                     break;
             }
@@ -260,6 +346,67 @@ public class LiquidGlassPreferencesActivity extends BasePreferencesActivity {
                 return 4;
             }
             return 5;
+        }
+    }
+
+    /**
+     * Small preview surface that renders the current glass parameters.
+     */
+    private static class GlassPreviewView extends View {
+        private LiquidGlassEffect effect;
+        private Bitmap background;
+        private final RectF rect = new RectF();
+        private final Paint bgPaint = new Paint();
+
+        public GlassPreviewView(Context context) {
+            super(context);
+            setWillNotDraw(false);
+        }
+
+        public void setEffect(LiquidGlassEffect effect) {
+            this.effect = effect;
+            invalidate();
+        }
+
+        public LiquidGlassEffect getEffect() {
+            return effect;
+        }
+
+        private void ensureBackground() {
+            int w = Math.max(1, getWidth());
+            int h = Math.max(1, getHeight());
+            if (background != null && !background.isRecycled() && background.getWidth() == w && background.getHeight() == h) {
+                return;
+            }
+            if (background != null && !background.isRecycled()) {
+                background.recycle();
+            }
+            background = Bitmap.createBitmap(w, h, Bitmap.Config.ARGB_8888);
+            Canvas canvas = new Canvas(background);
+            int topColor = Theme.getColor(Theme.key_windowBackgroundWhite);
+            int bottomColor = Theme.getColor(Theme.key_actionBarDefault);
+            LinearGradient gradient = new LinearGradient(0, 0, w, h, topColor, bottomColor, Shader.TileMode.CLAMP);
+            bgPaint.setShader(gradient);
+            canvas.drawRect(0, 0, w, h, bgPaint);
+        }
+
+        @Override
+        protected void onDraw(Canvas canvas) {
+            super.onDraw(canvas);
+            ensureBackground();
+            if (effect != null && background != null && !background.isRecycled()) {
+                rect.set(getPaddingLeft(), getPaddingTop(), getWidth() - getPaddingRight(), getHeight() - getPaddingBottom());
+                effect.apply(canvas, rect, background);
+            }
+        }
+
+        @Override
+        protected void onDetachedFromWindow() {
+            super.onDetachedFromWindow();
+            if (background != null && !background.isRecycled()) {
+                background.recycle();
+            }
+            background = null;
         }
     }
 }

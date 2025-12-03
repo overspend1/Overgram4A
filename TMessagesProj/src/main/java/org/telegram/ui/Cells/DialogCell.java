@@ -22,6 +22,7 @@ import android.graphics.PorterDuff;
 import android.graphics.PorterDuffColorFilter;
 import android.graphics.PorterDuffXfermode;
 import android.graphics.RectF;
+import android.graphics.Rect;
 import android.graphics.Shader;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
@@ -51,6 +52,9 @@ import androidx.core.graphics.ColorUtils;
 
 import com.overspend1.overgram.OverFilter;
 import com.overspend1.overgram.OverUtils;
+import com.overspend1.overgram.OverConfig;
+import com.overspend1.overgram.ui.liquidglass.GlassParameters;
+import com.overspend1.overgram.ui.liquidglass.LiquidGlassEffect;
 import org.telegram.messenger.AndroidUtilities;
 import org.telegram.messenger.ApplicationLoader;
 import org.telegram.messenger.ChatObject;
@@ -132,8 +136,8 @@ public class DialogCell extends BaseCell {
     public static final int SENT_STATE_READ = 2;
     public boolean drawAvatar = true;
     public int messagePaddingStart = 72;
-    public int heightDefault = 72;
-    public int heightThreeLines = 78;
+    public int heightDefault = 69; // Overgram: Reduced from 72 to reduce crowding
+    public int heightThreeLines = 75; // Overgram: Reduced from 78 to reduce crowding
     public TLRPC.TL_forumTopic forumTopic;
     public boolean useFromUserAsAvatar;
     private boolean isTopic;
@@ -166,12 +170,103 @@ public class DialogCell extends BaseCell {
     private Path thumbPath = new Path();
     private SpoilerEffect thumbSpoiler = new SpoilerEffect();
 
+    // Liquid glass overlay support for dialog list
+    private LiquidGlassEffect glassEffect;
+    private Bitmap glassBackgroundCache;
+    private long lastGlassCaptureTime;
+    private final Rect glassTempRect = new Rect();
+
     public void setMoving(boolean moving) {
         this.moving = moving;
     }
 
     public boolean isMoving() {
         return moving;
+    }
+
+    @Override
+    protected void onDetachedFromWindow() {
+        super.onDetachedFromWindow();
+        clearGlassResources();
+    }
+
+    private boolean shouldUseLiquidGlass() {
+        return OverConfig.liquidGlassEnabled && (OverConfig.liquidGlassApplyToDialogs || OverConfig.liquidGlassApplyToSystemSurfaces);
+    }
+
+    private GlassParameters buildGlassParameters() {
+        com.overspend1.overgram.ui.liquidglass.LiquidGlassPreset preset = com.overspend1.overgram.ui.liquidglass.LiquidGlassPreset.fromId(OverConfig.liquidGlassPreset);
+        GlassParameters params = preset.toParameters();
+        params.blurRadius = OverConfig.liquidGlassBlurRadius;
+        params.opacity = OverConfig.liquidGlassOpacity;
+        params.clamp();
+        return params;
+    }
+
+    private void ensureGlassEffect() {
+        if (glassEffect == null) {
+            glassEffect = new LiquidGlassEffect(buildGlassParameters());
+        } else {
+            glassEffect.setParameters(buildGlassParameters());
+        }
+    }
+
+    private Bitmap captureGlassBackground() {
+        View parent = (View) getParent();
+        if (parent == null) {
+            return null;
+        }
+        int w = getMeasuredWidth();
+        int h = getMeasuredHeight();
+        if (w <= 0 || h <= 0) {
+            return null;
+        }
+        long now = System.currentTimeMillis();
+        if (glassBackgroundCache != null && !glassBackgroundCache.isRecycled() && now - lastGlassCaptureTime < 100) {
+            return glassBackgroundCache;
+        }
+        try {
+            Bitmap bitmap = Bitmap.createBitmap(w, h, Bitmap.Config.ARGB_8888);
+            Canvas canvas = new Canvas(bitmap);
+            Drawable bg = parent.getBackground();
+            if (bg != null) {
+                bg.setBounds(0, 0, parent.getWidth(), parent.getHeight());
+                bg.draw(canvas);
+            } else {
+                canvas.drawColor(Color.TRANSPARENT);
+            }
+            if (glassBackgroundCache != null && !glassBackgroundCache.isRecycled()) {
+                glassBackgroundCache.recycle();
+            }
+            glassBackgroundCache = bitmap;
+            lastGlassCaptureTime = now;
+            return bitmap;
+        } catch (Exception e) {
+            return null;
+        }
+    }
+
+    private void drawLiquidGlass(Canvas canvas) {
+        ensureGlassEffect();
+        Bitmap background = captureGlassBackground();
+        if (glassEffect != null && background != null && !background.isRecycled()) {
+            glassTempRect.set(0, 0, getMeasuredWidth(), getMeasuredHeight());
+            canvas.save();
+            glassEffect.apply(canvas, new RectF(glassTempRect), background);
+            canvas.restore();
+        }
+    }
+
+    private void clearGlassResources() {
+        if (glassBackgroundCache != null && !glassBackgroundCache.isRecycled()) {
+            glassBackgroundCache.recycle();
+        }
+        glassBackgroundCache = null;
+        lastGlassCaptureTime = 0;
+        if (glassEffect != null) {
+            glassEffect.recycle();
+            glassEffect = null;
+        }
     }
 
     public void setForumTopic(TLRPC.TL_forumTopic topic, long dialog_id, MessageObject messageObject, boolean showTopicIconInName, boolean animated) {
@@ -3038,6 +3133,9 @@ public class DialogCell extends BaseCell {
         }
 
         int backgroundColor = 0;
+        if (!drawingForBlur && shouldUseLiquidGlass()) {
+            drawLiquidGlass(canvas);
+        }
         if (translationX != 0 || cornerProgress != 0.0f) {
             canvas.save();
             canvas.translate(0, -translateY);

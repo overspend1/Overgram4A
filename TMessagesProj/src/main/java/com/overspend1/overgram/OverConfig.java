@@ -59,6 +59,7 @@ public class OverConfig {
     public static boolean liquidGlassEnabled;
     public static boolean liquidGlassApplyToChatBubbles;
     public static boolean liquidGlassApplyToDialogs;
+    public static boolean liquidGlassApplyToSystemSurfaces;
     public static int liquidGlassPreset;
     public static float liquidGlassBlurRadius;
     public static float liquidGlassOpacity;
@@ -68,6 +69,18 @@ public class OverConfig {
     public static String geminiApiKey;
     public static String geminiModel;
     public static boolean turkishSmartTranslate;
+
+    // Productivity / UX
+    public static boolean smartQuickReplies;
+    public static boolean autoTranslateIncomingDefault;
+    public static boolean autoTranslateOutgoingDefault;
+    public static String autoTranslateOutgoingLangDefault;
+    public static String autoTranslateIncomingLangDefault;
+
+    // YagizTranslator - Turkish ↔ English specialized translation
+    public static boolean yagizTranslatorEnabled;
+    public static int yagizTranslatorApiType; // 0=Gemini, 1=Google, 2=DeepL
+    public static boolean yagizTranslatorAutoDetect; // Auto-detect and translate Turkish↔English
 
     private static String key(String base, long dialogId) {
         return base + "_" + dialogId;
@@ -87,6 +100,39 @@ public class OverConfig {
 
     public static void setTurkishTranslateForDialog(long dialogId, boolean enabled) {
         preferences.edit().putBoolean(key("turkishSmartTranslateChat", dialogId), enabled).apply();
+    }
+
+    public static boolean isAutoTranslateIncoming(long dialogId) {
+        return preferences.getBoolean(key("autoTranslateIncoming", dialogId), autoTranslateIncomingDefault);
+    }
+
+    public static void setAutoTranslateIncoming(long dialogId, boolean enabled) {
+        preferences.edit().putBoolean(key("autoTranslateIncoming", dialogId), enabled).apply();
+    }
+
+    public static boolean isAutoTranslateOutgoing(long dialogId) {
+        return preferences.getBoolean(key("autoTranslateOutgoing", dialogId), autoTranslateOutgoingDefault);
+    }
+
+    public static void setAutoTranslateOutgoing(long dialogId, boolean enabled) {
+        preferences.edit().putBoolean(key("autoTranslateOutgoing", dialogId), enabled).apply();
+    }
+
+    public static String getAutoTranslateOutgoingLang(long dialogId) {
+        return preferences.getString(key("autoTranslateOutgoingLang", dialogId), autoTranslateOutgoingLangDefault);
+    }
+
+    public static void setAutoTranslateOutgoingLang(long dialogId, String lang) {
+        preferences.edit().putString(key("autoTranslateOutgoingLang", dialogId), lang).apply();
+    }
+
+    // YagizTranslator per-dialog settings
+    public static boolean isYagizTranslatorEnabledForDialog(long dialogId) {
+        return preferences.getBoolean(key("yagizTranslatorEnabled", dialogId), yagizTranslatorEnabled);
+    }
+
+    public static void setYagizTranslatorEnabledForDialog(long dialogId, boolean enabled) {
+        preferences.edit().putBoolean(key("yagizTranslatorEnabled", dialogId), enabled).apply();
     }
 
     private static boolean configLoaded;
@@ -154,19 +200,30 @@ public class OverConfig {
             WALMode = preferences.getBoolean("walMode", true);
 
             // ~ Liquid Glass
-            // Liquid glass defaults: on, moderate blur, applied broadly
+            // Liquid glass defaults: on, subtle blur for consistency, applied broadly
             liquidGlassEnabled = preferences.getBoolean("liquidGlassEnabled", true);
             liquidGlassApplyToChatBubbles = preferences.getBoolean("liquidGlassApplyToChatBubbles", true);
             liquidGlassApplyToDialogs = preferences.getBoolean("liquidGlassApplyToDialogs", true);
-            liquidGlassPreset = preferences.getInt("liquidGlassPreset", 1); // Default: STANDARD
-            liquidGlassBlurRadius = preferences.getFloat("liquidGlassBlurRadius", 10f);
-            liquidGlassOpacity = preferences.getFloat("liquidGlassOpacity", 0.78f);
+            liquidGlassApplyToSystemSurfaces = preferences.getBoolean("liquidGlassApplyToSystemSurfaces", true);
+            liquidGlassPreset = preferences.getInt("liquidGlassPreset", 0); // Default: SUBTLE for consistency
+            liquidGlassBlurRadius = preferences.getFloat("liquidGlassBlurRadius", 6f); // Subtle blur
+            liquidGlassOpacity = preferences.getFloat("liquidGlassOpacity", 0.92f); // More transparent
 
             // AI
             geminiEnabled = preferences.getBoolean("geminiEnabled", false);
             geminiApiKey = preferences.getString("geminiApiKey", "");
             geminiModel = preferences.getString("geminiModel", "gemini-2.5-flash");
             turkishSmartTranslate = preferences.getBoolean("turkishSmartTranslate", false);
+
+            smartQuickReplies = preferences.getBoolean("smartQuickReplies", true);
+            autoTranslateIncomingDefault = preferences.getBoolean("autoTranslateIncomingDefault", false);
+            autoTranslateOutgoingDefault = preferences.getBoolean("autoTranslateOutgoingDefault", false);
+            autoTranslateOutgoingLangDefault = preferences.getString("autoTranslateOutgoingLangDefault", "en");
+            autoTranslateIncomingLangDefault = preferences.getString("autoTranslateIncomingLangDefault", "en");
+
+            yagizTranslatorEnabled = preferences.getBoolean("yagizTranslatorEnabled", false);
+            yagizTranslatorApiType = preferences.getInt("yagizTranslatorApiType", 0); // Default: Gemini
+            yagizTranslatorAutoDetect = preferences.getBoolean("yagizTranslatorAutoDetect", true);
 
             configLoaded = true;
         }

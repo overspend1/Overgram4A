@@ -83,6 +83,7 @@ import android.widget.FrameLayout;
 import android.widget.HorizontalScrollView;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
+import android.widget.ScrollView;
 import android.widget.Space;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -1326,6 +1327,10 @@ public class ChatActivity extends BaseFragment implements NotificationCenter.Not
     private final static int open_forum = 61;
 
     private final static int translate = 62;
+    private final static int auto_translate_incoming = 63;
+    private final static int auto_translate_outgoing = 64;
+    private final static int auto_translate_lang = 65;
+    private final static int yagiz_translator = 66;
 
     private final static int permissions = 100;
     private final static int administrators = 101;
@@ -3149,6 +3154,38 @@ public class ChatActivity extends BaseFragment implements NotificationCenter.Not
                     if (!getMessagesController().getTranslateController().toggleTranslatingDialog(getDialogId(), true)) {
                         updateTopPanel(true);
                     }
+                } else if (id == auto_translate_incoming) {
+                    // Overgram: Toggle auto-translate incoming for this chat
+                    boolean currentState = OverConfig.isAutoTranslateIncoming(dialog_id);
+                    OverConfig.setAutoTranslateIncoming(dialog_id, !currentState);
+                    BulletinFactory.of(ChatActivity.this).createSimpleBulletin(
+                            !currentState ? R.raw.done : R.raw.deactivate,
+                            !currentState ? LocaleController.getString(R.string.AutoTranslateEnabled) : LocaleController.getString(R.string.AutoTranslateDisabled)
+                    ).show();
+                    if (!currentState && !getMessagesController().getTranslateController().isTranslatingDialog(dialog_id)) {
+                        getMessagesController().getTranslateController().toggleTranslatingDialog(dialog_id, true);
+                    }
+                } else if (id == auto_translate_outgoing) {
+                    // Overgram: Toggle auto-translate outgoing for this chat
+                    boolean currentState = OverConfig.isAutoTranslateOutgoing(dialog_id);
+                    OverConfig.setAutoTranslateOutgoing(dialog_id, !currentState);
+                    BulletinFactory.of(ChatActivity.this).createSimpleBulletin(
+                            !currentState ? R.raw.done : R.raw.deactivate,
+                            !currentState ? LocaleController.getString(R.string.AutoTranslateEnabled) : LocaleController.getString(R.string.AutoTranslateDisabled)
+                    ).show();
+                } else if (id == auto_translate_lang) {
+                    // Overgram: Show language picker for this chat
+                    showAutoTranslateLanguagePicker();
+                } else if (id == yagiz_translator) {
+                    // Overgram: Toggle YagizTranslator for this chat
+                    boolean currentState = OverConfig.isYagizTranslatorEnabledForDialog(dialog_id);
+                    OverConfig.setYagizTranslatorEnabledForDialog(dialog_id, !currentState);
+                    BulletinFactory.of(ChatActivity.this).createSimpleBulletin(
+                            !currentState ? R.raw.done : R.raw.deactivate,
+                            !currentState ?
+                                LocaleController.getString(R.string.YagizTranslatorEnabled) + " - " + com.overspend1.overgram.translator.YagizTranslator.getApiName(OverConfig.yagizTranslatorApiType) :
+                                LocaleController.getString(R.string.YagizTranslatorPerChat) + " " + LocaleController.getString(R.string.AutoTranslateDisabled)
+                    ).show();
                 } else if (id == call || id == video_call) {
                     if (currentUser != null && getParentActivity() != null) {
                         VoIPHelper.startCall(currentUser, id == video_call, userInfo != null && userInfo.video_calls_available, getParentActivity(), getMessagesController().getUserFull(currentUser.id), getAccountInstance());
@@ -3490,6 +3527,15 @@ public class ChatActivity extends BaseFragment implements NotificationCenter.Not
             }
             translateItem = headerItem.lazilyAddSubItem(translate, R.drawable.msg_translate, LocaleController.getString("TranslateMessage", R.string.TranslateMessage));
             updateTranslateItemVisibility();
+
+            // Overgram: Per-chat auto-translate controls
+            headerItem.lazilyAddSubItem(auto_translate_incoming, R.drawable.msg_translate, LocaleController.getString(R.string.AutoTranslatePerChatIncoming));
+            headerItem.lazilyAddSubItem(auto_translate_outgoing, R.drawable.msg_translate, LocaleController.getString(R.string.AutoTranslatePerChatOutgoing));
+            headerItem.lazilyAddSubItem(auto_translate_lang, R.drawable.msg_language, LocaleController.getString(R.string.AutoTranslatePerChatLang));
+
+            // Overgram: YagizTranslator toggle
+            headerItem.lazilyAddSubItem(yagiz_translator, R.drawable.msg_translate, LocaleController.getString(R.string.YagizTranslatorPerChat));
+
             if (currentChat != null && !currentChat.creator && !ChatObject.hasAdminRights(currentChat)) {
                 headerItem.lazilyAddSubItem(report, R.drawable.msg_report, LocaleController.getString("ReportChat", R.string.ReportChat));
             }
@@ -5565,6 +5611,10 @@ public class ChatActivity extends BaseFragment implements NotificationCenter.Not
                             }
                             outRect.bottom = -h;
                         }
+                    }
+                    if (outRect.bottom == 0) {
+                        // Add a bit of breathing room between standalone messages
+                        outRect.bottom = AndroidUtilities.dp(6);
                     }
                 }
             }
@@ -16672,6 +16722,19 @@ public class ChatActivity extends BaseFragment implements NotificationCenter.Not
                     }
                     return;
                 }
+
+                // Overgram: Update smart quick replies when new messages arrive
+                if (OverConfig.smartQuickReplies && chatActivityEnterView != null && !arr.isEmpty()) {
+                    // Get the last message that's not from current user
+                    for (int i = arr.size() - 1; i >= 0; i--) {
+                        MessageObject msg = arr.get(i);
+                        if (!msg.isOut() && !msg.isService()) {
+                            chatActivityEnterView.updateSmartQuickReplies(msg);
+                            break;
+                        }
+                    }
+                }
+
                 processNewMessages(arr);
             } else if (ChatObject.isChannel(currentChat) && !currentChat.megagroup && chatInfo != null && did == -chatInfo.linked_chat_id) {
                 for (int a = 0, N = arr.size(); a < N; a++) {
@@ -19247,6 +19310,44 @@ public class ChatActivity extends BaseFragment implements NotificationCenter.Not
         LongSparseArray<Long> scheduledGroupReplacement = null;
         for (int a = 0, N = arr.size(); a < N; a++) {
             MessageObject messageObject = arr.get(a);
+
+            // Overgram: Auto-translate incoming messages for full two-way conversation
+            boolean shouldUseYagizTranslator = OverConfig.isYagizTranslatorEnabledForDialog(dialog_id) &&
+                                               OverConfig.yagizTranslatorAutoDetect;
+
+            if (shouldUseYagizTranslator && !messageObject.isOut() && !messageObject.isService()) {
+                // YagizTranslator: Turkish ↔ English auto-detection
+                String messageText = messageObject.messageOwner.message;
+                if (messageText != null && !messageText.isEmpty()) {
+                    com.overspend1.overgram.translator.YagizTranslator.translateAuto(
+                        messageText,
+                        (translatedText, detectedLang) -> {
+                            // Enable translation UI and show translated text
+                            if (!getMessagesController().getTranslateController().isTranslatingDialog(dialog_id)) {
+                                getMessagesController().getTranslateController().toggleTranslatingDialog(dialog_id, true);
+                            }
+                        },
+                        error -> FileLog.d("YagizTranslator: Failed to translate incoming message - " + error)
+                    );
+                }
+            } else if (OverConfig.isAutoTranslateIncoming(dialog_id) && !messageObject.isOut() && !messageObject.isService()) {
+                // Regular auto-translate incoming
+                if (!getMessagesController().getTranslateController().isTranslatingDialog(dialog_id)) {
+                    getMessagesController().getTranslateController().toggleTranslatingDialog(dialog_id, true);
+                }
+
+                // Get user's language preference
+                String targetLang = OverConfig.autoTranslateIncomingLangDefault;
+                if (targetLang == null || targetLang.isEmpty()) {
+                    targetLang = java.util.Locale.getDefault().getLanguage();
+                    if (targetLang == null || targetLang.isEmpty()) {
+                        targetLang = "en";
+                    }
+                }
+
+                // Set the target language for this dialog in TranslateController
+                getMessagesController().getTranslateController().setDialogTranslateTo(dialog_id, targetLang);
+            }
             if (!isAd) {
                 isAd = messageObject.isSponsored();
             }
@@ -32682,7 +32783,8 @@ public class ChatActivity extends BaseFragment implements NotificationCenter.Not
     }
 
     private void requestGemini(CharSequence messageText, boolean translateToTurkish) {
-        if (getParentActivity() == null || messageText == null || messageText.length() == 0) {
+        if (getParentActivity() == null || messageText == null || TextUtils.isEmpty(messageText.toString().trim())) {
+            BulletinFactory.of(this).createSimpleBulletin(R.raw.error, LocaleController.getString(R.string.OvergramGeminiNoInput)).show();
             return;
         }
         if (TextUtils.isEmpty(OverConfig.geminiApiKey)) {
@@ -32709,6 +32811,10 @@ public class ChatActivity extends BaseFragment implements NotificationCenter.Not
                     if (progressDialog.isShowing()) {
                         progressDialog.dismiss();
                     }
+                    if (TextUtils.isEmpty(text)) {
+                        BulletinFactory.of(ChatActivity.this).createSimpleBulletin(R.raw.error, LocaleController.getString(R.string.OvergramGeminiEmptyResponse)).show();
+                        return;
+                    }
                     showGeminiResult(translateToTurkish ? LocaleController.getString(R.string.OvergramTranslateTurkish) : LocaleController.getString(R.string.OvergramGeminiAsk), text);
                 });
             }
@@ -32729,21 +32835,133 @@ public class ChatActivity extends BaseFragment implements NotificationCenter.Not
         if (getParentActivity() == null) {
             return;
         }
-        AlertDialog.Builder builder = new AlertDialog.Builder(getParentActivity(), themeDelegate);
-        builder.setTitle(title);
-        builder.setMessage(body);
-        builder.setPositiveButton(LocaleController.getString("Copy", R.string.Copy), (dialog, which) -> {
-            if (!TextUtils.isEmpty(body)) {
-                AndroidUtilities.addToClipboard(body);
-                BulletinFactory.of(this).createSimpleBulletin(R.raw.copy, LocaleController.getString("TextCopied", R.string.TextCopied)).show();
-            }
-        });
-        builder.setNeutralButton(LocaleController.getString("Paste", R.string.Paste), (dialog, which) -> {
+        Context ctx = getParentActivity();
+        BottomSheet.Builder builder = new BottomSheet.Builder(ctx, false, themeDelegate);
+        builder.setApplyTopPadding(false);
+
+        LinearLayout container = new LinearLayout(ctx);
+        container.setOrientation(LinearLayout.VERTICAL);
+        int pad = AndroidUtilities.dp(20);
+        container.setPadding(pad, pad, pad, pad);
+
+        TextView titleView = new TextView(ctx);
+        titleView.setTextColor(Theme.getColor(Theme.key_dialogTextBlack));
+        titleView.setTextSize(TypedValue.COMPLEX_UNIT_DIP, 18);
+        titleView.setTypeface(AndroidUtilities.getTypeface("fonts/rmedium.ttf"));
+        titleView.setText(title);
+        container.addView(titleView, new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT));
+
+        ScrollView scrollView = new ScrollView(ctx);
+        scrollView.setFillViewport(true);
+        TextView bodyView = new TextView(ctx);
+        bodyView.setTextColor(Theme.getColor(Theme.key_dialogTextBlack));
+        bodyView.setTextSize(TypedValue.COMPLEX_UNIT_DIP, 16);
+        bodyView.setText(body);
+        bodyView.setTextIsSelectable(true);
+        bodyView.setLineSpacing(AndroidUtilities.dp(2), 1.1f);
+        int bodyPad = AndroidUtilities.dp(4);
+        bodyView.setPadding(bodyPad, bodyPad, bodyPad, bodyPad);
+        scrollView.addView(bodyView, new ScrollView.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT));
+        container.addView(scrollView, new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, AndroidUtilities.dp(260)));
+
+        LinearLayout actions = new LinearLayout(ctx);
+        actions.setOrientation(LinearLayout.HORIZONTAL);
+        actions.setGravity(Gravity.END);
+        actions.setPadding(0, AndroidUtilities.dp(12), 0, 0);
+
+        actions.addView(createGeminiActionButton(ctx, LocaleController.getString("Copy", R.string.Copy), () -> {
+            AndroidUtilities.addToClipboard(body);
+            BulletinFactory.of(this).createSimpleBulletin(R.raw.copy, LocaleController.getString("TextCopied", R.string.TextCopied)).show();
+        }));
+
+        actions.addView(createGeminiActionButton(ctx, LocaleController.getString("Paste", R.string.Paste), () -> {
             if (chatActivityEnterView != null && !TextUtils.isEmpty(body)) {
                 chatActivityEnterView.setFieldText(body, true);
             }
+        }));
+
+        actions.addView(createGeminiActionButton(ctx, LocaleController.getString("ShareFile", R.string.ShareFile), () -> {
+            try {
+                Intent intent = new Intent(Intent.ACTION_SEND);
+                intent.setType("text/plain");
+                intent.putExtra(Intent.EXTRA_TEXT, body);
+                ctx.startActivity(Intent.createChooser(intent, LocaleController.getString("ShareFile", R.string.ShareFile)));
+            } catch (Exception e) {
+                FileLog.e(e);
+            }
+        }));
+
+        container.addView(actions, new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT));
+
+        builder.setCustomView(container);
+        showDialog(builder.create());
+    }
+
+    private View createGeminiActionButton(Context context, String text, Runnable onClick) {
+        TextView button = new TextView(context);
+        button.setText(text);
+        button.setTextSize(TypedValue.COMPLEX_UNIT_DIP, 14);
+        button.setTypeface(AndroidUtilities.getTypeface("fonts/rmedium.ttf"));
+        button.setTextColor(Theme.getColor(Theme.key_dialogTextBlack));
+        int padH = AndroidUtilities.dp(14);
+        int padV = AndroidUtilities.dp(10);
+        button.setPadding(padH, padV, padH, padV);
+        button.setBackground(Theme.createSimpleSelectorRoundRectDrawable(AndroidUtilities.dp(8), Theme.getColor(Theme.key_windowBackgroundWhite), Theme.getColor(Theme.key_dialogButtonSelector)));
+        LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT);
+        params.leftMargin = AndroidUtilities.dp(8);
+        button.setLayoutParams(params);
+        button.setOnClickListener(v -> {
+            if (onClick != null) {
+                onClick.run();
+            }
         });
-        builder.setNegativeButton(LocaleController.getString("Close", R.string.Close), null);
+        return button;
+    }
+
+    private void showAutoTranslateLanguagePicker() {
+        if (getParentActivity() == null) {
+            return;
+        }
+
+        String[][] languages = {
+            {"en", "English"},
+            {"es", "Spanish"},
+            {"fr", "French"},
+            {"de", "German"},
+            {"it", "Italian"},
+            {"pt", "Portuguese"},
+            {"ru", "Russian"},
+            {"ja", "Japanese"},
+            {"ko", "Korean"},
+            {"zh", "Chinese"},
+            {"ar", "Arabic"},
+            {"hi", "Hindi"},
+            {"tr", "Turkish"},
+            {"pl", "Polish"},
+            {"uk", "Ukrainian"},
+            {"nl", "Dutch"},
+            {"sv", "Swedish"},
+            {"no", "Norwegian"},
+            {"da", "Danish"},
+            {"fi", "Finnish"}
+        };
+
+        String[] options = new String[languages.length];
+        for (int i = 0; i < languages.length; i++) {
+            options[i] = languages[i][1];
+        }
+
+        AlertDialog.Builder builder = new AlertDialog.Builder(getParentActivity());
+        builder.setTitle(LocaleController.getString(R.string.AutoTranslatePerChatLang));
+        builder.setItems(options, (dialog, which) -> {
+            String selectedLang = languages[which][0];
+            OverConfig.setAutoTranslateOutgoingLang(dialog_id, selectedLang);
+            BulletinFactory.of(ChatActivity.this).createSimpleBulletin(
+                    R.raw.done,
+                    LocaleController.getString(R.string.AutoTranslatePerChatLang) + ": " + languages[which][1]
+            ).show();
+        });
+        builder.setNegativeButton(LocaleController.getString("Cancel", R.string.Cancel), null);
         showDialog(builder.create());
     }
 }

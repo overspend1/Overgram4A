@@ -47,6 +47,24 @@
   <string name="RegexFiltersAddDescription">You can use site <![CDATA[<a href="https://regex101.com">regex101.com</a>]]> to fully test your regular expression.
     You can also use plain text, but don\'t forget to escape brackets.</string>
   <string name="RegexFiltersAddError">Regex syntax error</string>
+  <string name="ProductivityHeader">Productivity &amp; UX</string>
+  <string name="SmartQuickReplies">Smart quick replies</string>
+  <string name="SmartQuickRepliesHint">Show AI-suggested short replies in chat</string>
+  <string name="AutoTranslateIncoming">Auto-translate incoming (default)</string>
+  <string name="AutoTranslateIncomingHint">Automatically translate messages you receive</string>
+  <string name="AutoTranslateOutgoing">Auto-translate outgoing (default)</string>
+  <string name="AutoTranslateOutgoingHint">Automatically translate before sending</string>
+  <string name="AutoTranslateOutgoingLang">Default outgoing language</string>
+  <string name="AutoTranslateOutgoingLangHint">Target language for outgoing messages</string>
+  <string name="AutoTranslateIncomingLang">Your language (for incoming)</string>
+  <string name="AutoTranslateIncomingLangHint">Your preferred language for reading messages</string>
+  <string name="AutoTranslatePerChatIncoming">Auto-translate incoming for this chat</string>
+  <string name="AutoTranslatePerChatOutgoing">Auto-translate outgoing for this chat</string>
+  <string name="AutoTranslatePerChatLang">Set outgoing language for this chat</string>
+  <string name="AutoTranslateEnabled">Auto-translate enabled</string>
+  <string name="AutoTranslateDisabled">Auto-translate disabled</string>
+  <string name="AutoTranslatingMessage">Translating...</string>
+  <string name="AutoTranslateFailed">Translation failed. Sending original message.</string>
   <string name="AyuSyncHeader">OvergramSync</string>
   <string name="AyuSyncStatusTitle">Sync status</string>
   <string name="AyuSyncStatusOk">connected</string>
@@ -112,6 +130,7 @@
   <string name="LiquidGlassEnableHint">Apply glassmorphism effects throughout the app</string>
   <string name="LiquidGlassApplyToChatBubbles">Chat bubbles</string>
   <string name="LiquidGlassApplyToDialogs">Dialog list</string>
+  <string name="LiquidGlassApplyToSystem">System surfaces (headers, drawers)</string>
   <string name="LiquidGlassPreset">Preset style</string>
   <string name="LiquidGlassPresetSubtle">Subtle</string>
   <string name="LiquidGlassPresetStandard">Standard</string>
@@ -124,5 +143,14 @@
   <string name="LiquidGlassCustomization">Advanced customization</string>
   <string name="LiquidGlassPerformance">Performance</string>
   <string name="LiquidGlassPerformanceHint">Liquid glass effects are GPU-accelerated for smooth 60 FPS</string>
+  <string name="OvergramQuickActions">Quick actions</string>
+  <string name="OvergramQuickActionsHint">Fast access to AI and glass settings</string>
+  <string name="OvergramQuickActionToggleGlass">Toggle liquid glass</string>
+  <string name="OvergramQuickActionToggleGhost">Toggle ghost mode</string>
+  <string name="OvergramQuickActionOpenGlass">Open liquid glass settings</string>
+  <string name="OvergramQuickActionOpenAi">Open AI &amp; translation settings</string>
+  <string name="OriginalText">Original</string>
+  <string name="TranslatedText">Translated</string>
+  <string name="AcceptTranslation">Use translation</string>
+  <string name="CancelTranslation">Keep original</string>
 </resources>
-

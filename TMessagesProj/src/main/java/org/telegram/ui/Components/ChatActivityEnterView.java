@@ -493,6 +493,8 @@ public class ChatActivityEnterView extends BlurredFrameLayout implements Notific
     public ValueAnimator currentTopViewAnimation;
     @Nullable
     private ReplaceableIconDrawable botButtonDrawable;
+    private com.overspend1.overgram.ui.components.SmartQuickRepliesView smartQuickRepliesView;
+    private com.overspend1.overgram.ui.components.TranslationPropositionView translationPropositionView;
 
     private CharSequence draftMessage;
     private boolean draftSearchWebpage;
@@ -2615,6 +2617,23 @@ public class ChatActivityEnterView extends BlurredFrameLayout implements Notific
         checkChannelRights();
 
         createMessageEditText();
+
+        // Overgram: Initialize smart quick replies view
+        if (OverConfig.smartQuickReplies) {
+            smartQuickRepliesView = new com.overspend1.overgram.ui.components.SmartQuickRepliesView(context);
+            smartQuickRepliesView.setOnReplySelectedListener(reply -> {
+                if (messageEditText != null) {
+                    messageEditText.setText(reply);
+                    messageEditText.setSelection(reply.length());
+                }
+                smartQuickRepliesView.hide();
+            });
+            addView(smartQuickRepliesView, LayoutHelper.createFrame(LayoutHelper.MATCH_PARENT, LayoutHelper.WRAP_CONTENT, Gravity.BOTTOM, 0, 0, 0, 50));
+        }
+
+        // Overgram: Initialize translation proposition view
+        translationPropositionView = new com.overspend1.overgram.ui.components.TranslationPropositionView(context, resourcesProvider);
+        addView(translationPropositionView, LayoutHelper.createFrame(LayoutHelper.MATCH_PARENT, LayoutHelper.WRAP_CONTENT, Gravity.BOTTOM, 8, 0, 8, 58));
     }
 
     private void createCaptionLimitView() {
@@ -3352,6 +3371,21 @@ public class ChatActivityEnterView extends BlurredFrameLayout implements Notific
 
     public ChatActivity getParentFragment() {
         return parentFragment;
+    }
+
+    /**
+     * Overgram: Update smart quick replies based on the last received message
+     */
+    public void updateSmartQuickReplies(MessageObject lastMessage) {
+        if (OverConfig.smartQuickReplies && smartQuickRepliesView != null && lastMessage != null) {
+            // Only show/update if input is empty
+            if (messageEditText == null || messageEditText.length() == 0) {
+                smartQuickRepliesView.updateRepliesForMessage(lastMessage);
+                if (!smartQuickRepliesView.isShowing()) {
+                    smartQuickRepliesView.show();
+                }
+            }
+        }
     }
 
     private void checkBotMenu() {
@@ -4207,6 +4241,21 @@ public class ChatActivityEnterView extends BlurredFrameLayout implements Notific
                             messageWebPageSearch = true;
                         }
                         delegate.onTextChanged(charSequence, before > count + 1 || (count - before) > 2);
+                    }
+
+                    // Overgram: Handle smart quick replies visibility
+                    if (OverConfig.smartQuickReplies && smartQuickRepliesView != null) {
+                        if (charSequence.length() > 0) {
+                            // Hide quick replies when user starts typing
+                            if (smartQuickRepliesView.isShowing()) {
+                                smartQuickRepliesView.hide();
+                            }
+                        } else {
+                            // Show quick replies when input is empty
+                            if (!smartQuickRepliesView.isShowing()) {
+                                smartQuickRepliesView.show();
+                            }
+                        }
                     }
                 }
                 if (innerTextChange != 2 && (count - before) > 1) {
@@ -5374,6 +5423,39 @@ public class ChatActivityEnterView extends BlurredFrameLayout implements Notific
         }
     }
 
+    private void sendMessageAfterTranslate(CharSequence message, boolean notify, int scheduleDate) {
+        if (checkPremiumAnimatedEmoji(currentAccount, dialog_id, parentFragment, null, message)) {
+            return;
+        }
+        if (processSendingText(message, notify, scheduleDate)) {
+            if (delegate.hasForwardingMessages() || (scheduleDate != 0 && !isInScheduleMode()) || isInScheduleMode()) {
+                if (messageEditText != null) {
+                    messageEditText.setText("");
+                }
+                if (delegate != null) {
+                    delegate.onMessageSend(message, notify, scheduleDate);
+                }
+            } else {
+                messageTransitionIsRunning = false;
+                AndroidUtilities.runOnUIThread(moveToSendStateRunnable = () -> {
+                    moveToSendStateRunnable = null;
+                    hideTopView(true);
+                    if (messageEditText != null) {
+                        messageEditText.setText("");
+                    }
+                    if (delegate != null) {
+                        delegate.onMessageSend(message, notify, scheduleDate);
+                    }
+                }, 200);
+            }
+            lastTypingTimeSend = 0;
+        } else if (forceShowSendButton) {
+            if (delegate != null) {
+                delegate.onMessageSend(null, notify, scheduleDate);
+            }
+        }
+    }
+
     private boolean premiumEmojiBulletin = true;
     private void sendMessageInternal(boolean notify, int scheduleDate) {
         if (slowModeTimer == Integer.MAX_VALUE && !isInScheduleMode()) {
@@ -5430,6 +5512,75 @@ public class ChatActivityEnterView extends BlurredFrameLayout implements Notific
         if (checkPremiumAnimatedEmoji(currentAccount, dialog_id, parentFragment, null, message)) {
             return;
         }
+
+        // Overgram: Check YagizTranslator first (Turkish ↔ English specialized)
+        boolean shouldUseYagizTranslator = OverConfig.isYagizTranslatorEnabledForDialog(dialog_id) &&
+                                           OverConfig.yagizTranslatorAutoDetect;
+
+        if (shouldUseYagizTranslator && message.length() > 0 && translationPropositionView != null && !translationPropositionView.isShowing()) {
+            final CharSequence originalMessage = message;
+            com.overspend1.overgram.translator.YagizTranslator.translateAuto(
+                message.toString(),
+                (translatedText, detectedLang) -> AndroidUtilities.runOnUIThread(() -> {
+                    if (translationPropositionView != null && !originalMessage.toString().equals(translatedText)) {
+                        translationPropositionView.showProposition(
+                            originalMessage.toString(),
+                            translatedText,
+                            accepted -> {
+                                if (messageEditText != null) {
+                                    messageEditText.setText(accepted);
+                                }
+                                sendMessageAfterTranslate(accepted, notify, scheduleDate);
+                            },
+                            () -> {
+                                sendMessageAfterTranslate(originalMessage, notify, scheduleDate);
+                            }
+                        );
+                    } else {
+                        // No translation needed, send as-is
+                        sendMessageAfterTranslate(originalMessage, notify, scheduleDate);
+                    }
+                }),
+                error -> AndroidUtilities.runOnUIThread(() -> {
+                    BulletinFactory.of(parentFragment).createSimpleBulletin(R.raw.error, LocaleController.getString(R.string.AutoTranslateFailed)).show();
+                    sendMessageAfterTranslate(originalMessage, notify, scheduleDate);
+                })
+            );
+            return;
+        }
+
+        // Overgram: Regular auto-translate outgoing messages
+        if (OverConfig.isAutoTranslateOutgoing(dialog_id) && message.length() > 0 && translationPropositionView != null && !translationPropositionView.isShowing()) {
+            String targetLang = OverConfig.getAutoTranslateOutgoingLang(dialog_id);
+            if (targetLang != null && !targetLang.isEmpty()) {
+                final CharSequence originalMessage = message;
+                TranslatorUtils.translate(message, targetLang, translatedText -> AndroidUtilities.runOnUIThread(() -> {
+                    if (translationPropositionView != null && !originalMessage.toString().equals(translatedText.toString())) {
+                        translationPropositionView.showProposition(
+                            originalMessage.toString(),
+                            translatedText.toString(),
+                            accepted -> {
+                                if (messageEditText != null) {
+                                    messageEditText.setText(accepted);
+                                }
+                                sendMessageAfterTranslate(accepted, notify, scheduleDate);
+                            },
+                            () -> {
+                                sendMessageAfterTranslate(originalMessage, notify, scheduleDate);
+                            }
+                        );
+                    } else {
+                        // No translation needed, send as-is
+                        sendMessageAfterTranslate(originalMessage, notify, scheduleDate);
+                    }
+                }), () -> AndroidUtilities.runOnUIThread(() -> {
+                    BulletinFactory.of(parentFragment).createSimpleBulletin(R.raw.error, LocaleController.getString(R.string.AutoTranslateFailed)).show();
+                    sendMessageAfterTranslate(originalMessage, notify, scheduleDate);
+                }));
+                return;
+            }
+        }
+
         if (processSendingText(message, notify, scheduleDate)) {
             if (delegate.hasForwardingMessages() || (scheduleDate != 0 && !isInScheduleMode()) || isInScheduleMode()) {
                 if (messageEditText != null) {

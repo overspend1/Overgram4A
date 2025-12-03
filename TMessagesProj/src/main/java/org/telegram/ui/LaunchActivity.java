@@ -36,6 +36,8 @@ import android.graphics.Paint;
 import android.graphics.Path;
 import android.graphics.Point;
 import android.graphics.Shader;
+import android.graphics.RenderEffect;
+import android.graphics.Shader.TileMode;
 import android.location.LocationManager;
 import android.media.AudioManager;
 import android.net.Uri;
@@ -99,6 +101,7 @@ import com.overspend1.overgram.OverConfig;
 import com.overspend1.overgram.OverConstants;
 import com.overspend1.overgram.OverCustomHandlers;
 import com.overspend1.overgram.OverUtils;
+import one.overgram.messenger.ui.liquidglass.LiquidGlassHelper;
 
 import org.telegram.PhoneFormat.PhoneFormat;
 import org.telegram.messenger.AccountInstance;
@@ -491,6 +494,7 @@ public class LaunchActivity extends BasePermissionsActivity implements INavigati
         sideMenu.setItemAnimator(itemAnimator);
         sideMenu.setBackgroundColor(Theme.getColor(Theme.key_chats_menuBackground));
         sideMenuContainer.setBackgroundColor(Theme.getColor(Theme.key_chats_menuBackground));
+        applyDrawerBlurIfNeeded();
         sideMenu.setLayoutManager(new LinearLayoutManager(this, LinearLayoutManager.VERTICAL, false));
         sideMenu.setAllowItemsInteractionDuringAnimation(false);
         sideMenu.setAdapter(drawerLayoutAdapter = new DrawerLayoutAdapter(this, itemAnimator, drawerLayoutContainer));
@@ -5647,6 +5651,9 @@ public class LaunchActivity extends BasePermissionsActivity implements INavigati
     @Override
     protected void onPause() {
         super.onPause();
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+            LiquidGlassHelper.removeWindowBlur(getWindow());
+        }
         isResumed = false;
         NotificationCenter.getGlobalInstance().postNotificationName(NotificationCenter.stopAllHeavyOperations, 4096);
         ApplicationLoader.mainInterfacePaused = true;
@@ -5780,6 +5787,11 @@ public class LaunchActivity extends BasePermissionsActivity implements INavigati
     @Override
     protected void onResume() {
         super.onResume();
+        if (OverConfig.liquidGlassEnabled && OverConfig.liquidGlassApplyToSystemSurfaces && Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+            LiquidGlassHelper.applyWindowBlur(getWindow(), (int) Math.max(12, OverConfig.liquidGlassBlurRadius * 2));
+        }
+        applyDrawerBlurIfNeeded();
+        applyChromeBlurIfNeeded();
         isResumed = true;
         if (onResumeStaticCallback != null) {
             onResumeStaticCallback.run();
@@ -5854,6 +5866,40 @@ public class LaunchActivity extends BasePermissionsActivity implements INavigati
             VoIPFragment.onResume();
         }
         invalidateTabletMode();
+    }
+
+    private void applyDrawerBlurIfNeeded() {
+        if (sideMenuContainer == null) {
+            return;
+        }
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S && OverConfig.liquidGlassEnabled && OverConfig.liquidGlassApplyToSystemSurfaces) {
+            float radius = Math.max(8f, OverConfig.liquidGlassBlurRadius * 1.5f);
+            sideMenuContainer.setRenderEffect(RenderEffect.createBlurEffect(radius, radius, TileMode.CLAMP));
+        } else if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+            sideMenuContainer.setRenderEffect(null);
+        }
+    }
+
+    private void applyChromeBlurIfNeeded() {
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.S) {
+            return;
+        }
+        RenderEffect effect = null;
+        if (OverConfig.liquidGlassEnabled && OverConfig.liquidGlassApplyToSystemSurfaces) {
+            float radius = Math.max(6f, OverConfig.liquidGlassBlurRadius * 1.2f);
+            effect = RenderEffect.createBlurEffect(radius, radius, TileMode.CLAMP);
+        }
+        setRenderEffectSafe(actionBarLayout, effect);
+        if (AndroidUtilities.isTablet()) {
+            setRenderEffectSafe(rightActionBarLayout, effect);
+            setRenderEffectSafe(layersActionBarLayout, effect);
+        }
+    }
+
+    private void setRenderEffectSafe(View view, RenderEffect effect) {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S && view != null) {
+            view.setRenderEffect(effect);
+        }
     }
 
     private void invalidateTabletMode() {

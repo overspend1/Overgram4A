@@ -15,6 +15,8 @@
     <string name="OvergramGeminiModelTitle">Model</string>
     <string name="OvergramGeminiMissingKey">Add your Gemini API key in AI settings first</string>
     <string name="OvergramGeminiWorking">Contacting Gemini...</string>
+    <string name="OvergramGeminiNoInput">Select a message or type something first</string>
+    <string name="OvergramGeminiEmptyResponse">Gemini did not return a reply. Try again.</string>
     <string name="OvergramAiEnableChat">Enable AI for this chat</string>
     <string name="OvergramAiDisableChat">Disable AI for this chat</string>
     <string name="OvergramAiEnabledChat">AI enabled for this chat</string>
